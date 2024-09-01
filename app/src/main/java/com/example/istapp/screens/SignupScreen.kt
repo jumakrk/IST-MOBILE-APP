@@ -37,7 +37,7 @@ import com.example.istapp.nav.Routes
 
 
 @Composable
-fun LoginScreen(navController: NavController){
+fun SignupScreen(navController: NavController){
 
     val buttonColors = ButtonDefaults.buttonColors(
         containerColor = Color.Red,
@@ -64,13 +64,13 @@ fun LoginScreen(navController: NavController){
 
         Spacer(modifier = Modifier.height(16.dp))
 
-        Text(text = "Welcome Back",
+        Text(text = "Welcome",
             fontSize = 28.sp,
             fontWeight = FontWeight.Bold)
 
         Spacer(modifier = Modifier.height(4.dp))
 
-        Text(text = "Please login to continue",
+        Text(text = "Please Create an account to continue",
             fontSize = 16.sp,
             color = Color.Gray,
         )
@@ -139,25 +139,19 @@ fun LoginScreen(navController: NavController){
         Button(onClick = { /*TODO*/ },
             colors = buttonColors,
             modifier = Modifier.width(120.dp),
-            ) {
-            Text(text = "Login")
+        ) {
+            Text(text = "Sign Up")
         }
 
         Spacer(modifier = Modifier.height(16.dp))
 
-        Text(text = "Forgot Password?",
-            Modifier.clickable {},
-            color = Color.Gray)
-
-        Spacer(modifier = Modifier.height(16.dp))
-
         Row {
-            Text(text = "Don't have an account? ",
+            Text(text = "Already have an account? ",
                 color = Color.Black,
                 fontWeight = FontWeight.Bold)
 
-            Text(text = "Sign Up",
-                Modifier.clickable {navController.navigate(Routes.signup)},
+            Text(text = "Login",
+                Modifier.clickable {navController.navigate(Routes.login)},
                 color = Color.Gray)
         }
 
@@ -169,7 +163,7 @@ fun LoginScreen(navController: NavController){
 
         Spacer(modifier = Modifier.height(16.dp))
 
-        Text(text = "Sign in with",
+        Text(text = "Sign up with",
             color = Color.Black,
             fontWeight = FontWeight.Bold)
 

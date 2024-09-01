@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "63951166264",
+    "project_id": "ist-app-642e0",
+    "storage_bucket": "ist-app-642e0.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:63951166264:android:ad6c7ab783c55194017fcd",
+        "android_client_info": {
+          "package_name": "com.example.istapp"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBEyPl_H2zt87572ihvHYZ-wOtRm3sHOno"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
