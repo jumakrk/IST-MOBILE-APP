@@ -15,11 +15,15 @@ import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.focus.FocusRequester
+import androidx.compose.ui.focus.focusRequester
+import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
@@ -27,6 +31,7 @@ import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+
 
 @Composable
 fun LoginScreen(){
@@ -38,8 +43,13 @@ fun LoginScreen(){
 
     var passwordVisible by remember { mutableStateOf(false) }
     var passwordText by remember { mutableStateOf("") }
+    var passwordIsFocused by remember { mutableStateOf(false) }
 
     var email by remember { mutableStateOf("") }
+    var emailIsFocused by remember { mutableStateOf(false) }
+
+    // FocusRequester to handle the focus state
+    val focusRequester = remember { FocusRequester() }
 
     Column(
         modifier = Modifier.fillMaxSize(),
@@ -65,8 +75,24 @@ fun LoginScreen(){
         Spacer(modifier = Modifier.height(16.dp))
 
         OutlinedTextField(value = email, onValueChange ={email = it},
-            label = { Text(text = "Email")},
-            modifier = Modifier.width(300.dp)
+            label = {
+                Text(
+                    text = "Email",
+                    color = if (emailIsFocused) Color.Red else Color.Gray
+                )},
+            colors = OutlinedTextFieldDefaults.colors(
+                focusedBorderColor = Color.Red,
+                unfocusedBorderColor = Color.Gray,
+                focusedLabelColor = Color.Red,
+                unfocusedLabelColor = Color.Gray,
+                cursorColor = Color.Red
+            ),
+            modifier = Modifier
+                .width(300.dp)
+                .focusRequester(focusRequester)
+                .onFocusChanged { focusState ->
+                    emailIsFocused = focusState.isFocused
+                }
         )
 
         Spacer(modifier = Modifier.height(16.dp))
@@ -79,8 +105,24 @@ fun LoginScreen(){
         }
 
         OutlinedTextField(value = passwordText, onValueChange ={passwordText = it},
-            label = { Text(text = "Password")},
-            modifier = Modifier.width(300.dp),
+            label = {
+                Text(
+                    text = "Password",
+                    color = if (passwordIsFocused) Color.Red else Color.Gray
+                )},
+            colors = OutlinedTextFieldDefaults.colors(
+                focusedBorderColor = Color.Red,
+                unfocusedBorderColor = Color.Gray,
+                focusedLabelColor = Color.Red,
+                unfocusedLabelColor = Color.Gray,
+                cursorColor = Color.Red
+            ),
+            modifier = Modifier
+                .width(300.dp)
+                .focusRequester(focusRequester)
+                .onFocusChanged { focusState ->
+                    passwordIsFocused = focusState.isFocused
+                },
             visualTransformation = if (passwordVisible) VisualTransformation.None else PasswordVisualTransformation(),
             trailingIcon = { Icon(painter = painterResource(id = icon),
                 contentDescription =  if (passwordVisible) "Hide Password" else "Show Password",
