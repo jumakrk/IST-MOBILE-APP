@@ -1,5 +1,6 @@
 package com.example.istapp.screens
 
+import android.widget.Toast
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -17,24 +18,27 @@ import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.*
+import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
+import com.example.istapp.AuthState
 import com.example.istapp.AuthViewModel
 import com.example.istapp.R
 import com.example.istapp.nav.Routes
 
 
 @Composable
-fun ForgotPasswordScreen(modifier: Modifier = Modifier, navController: NavController, authViewModel: AuthViewModel){
+fun ForgotPasswordScreen(navController: NavController, authViewModel: AuthViewModel){
 
     val buttonColors = ButtonDefaults.buttonColors(
         containerColor = Color.Red,
@@ -43,6 +47,18 @@ fun ForgotPasswordScreen(modifier: Modifier = Modifier, navController: NavContro
 
     var email by remember { mutableStateOf("") }
     var emailIsFocused by remember { mutableStateOf(false) }
+
+    val authState = authViewModel.authState.observeAsState()
+    val context = LocalContext.current
+
+    LaunchedEffect(authState.value){
+        when(authState.value){
+            is AuthState.Authenticated -> navController.navigate(Routes.forgotPassword)
+            is AuthState.Error -> Toast.makeText(context,
+                (authState.value as AuthState.Error).message, Toast.LENGTH_SHORT).show()
+            else -> Unit
+        }
+    }
 
     // FocusRequester to handle the focus state
     val focusRequester = remember { FocusRequester() }
@@ -93,7 +109,9 @@ fun ForgotPasswordScreen(modifier: Modifier = Modifier, navController: NavContro
 
         Spacer(modifier = Modifier.height(16.dp))
 
-        Button(onClick = {},
+        Button(onClick = {
+            authViewModel.resetPassword(email)
+        },
             colors = buttonColors,
             modifier = Modifier.width(150.dp),
         ) {

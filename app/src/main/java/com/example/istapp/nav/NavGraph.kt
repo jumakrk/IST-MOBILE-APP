@@ -22,7 +22,7 @@ fun NavGraph(modifier: Modifier = Modifier, authViewModel: AuthViewModel){
             SignupScreen(navController, authViewModel)
         })
         composable(Routes.forgotPassword, content = {
-            ForgotPasswordScreen(modifier, navController, authViewModel)
+            ForgotPasswordScreen(navController, authViewModel)
         })
         composable(Routes.homepage, content = {
             HomeScreen(navController, authViewModel)
