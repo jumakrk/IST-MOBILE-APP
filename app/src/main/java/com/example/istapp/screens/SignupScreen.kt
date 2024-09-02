@@ -192,25 +192,12 @@ fun SignupScreen(navController: NavController, authViewModel: AuthViewModel){
             modifier = Modifier.fillMaxWidth(),
             horizontalArrangement = Arrangement.SpaceEvenly
         ){
-            Image(painter = painterResource(id = R.drawable.facebook_logo), contentDescription ="Google Logo",
-                modifier = Modifier
-                    .size(30.dp)
-                    .clickable {
-                        // Handle Facebook login
-                    })
 
             Image(painter = painterResource(id = R.drawable.google_logo), contentDescription ="Facebook Logo",
                 modifier = Modifier
                     .size(30.dp)
                     .clickable {
                         // Handle Google login
-                    })
-
-            Image(painter = painterResource(id = R.drawable.twitter_logo), contentDescription ="Twitter Logo",
-                modifier = Modifier
-                    .size(30.dp)
-                    .clickable {
-                        // Handle Twitter login
                     })
         }
     }

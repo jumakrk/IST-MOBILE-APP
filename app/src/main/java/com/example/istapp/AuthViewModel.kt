@@ -5,6 +5,8 @@ import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import com.google.firebase.auth.FirebaseAuth
 
+//This AuthViewModel Contains the logic for the authentication process
+
 class AuthViewModel : ViewModel() {
     private val auth: FirebaseAuth = FirebaseAuth.getInstance()
 
@@ -40,11 +42,11 @@ class AuthViewModel : ViewModel() {
                 if (task.isSuccessful) {
                     val currentUser = auth.currentUser
                     if (currentUser != null && currentUser.isEmailVerified) {
-                        // Email is verified, proceed with login
+                        // When Email is verified, proceed with login
                         _authState.value = AuthState.Authenticated
                     } else {
-                        // Email is not verified
-                        _authState.value = AuthState.Error("Your email is not verified. Please check your inbox and verify your email to continue.")
+                        // hen Email is not verified
+                        _authState.value = AuthState.Success("Your email is not verified. Please check your inbox and verify your email to continue.")
                     }
                 } else {
                     // Handle sign-in failure
@@ -75,7 +77,7 @@ class AuthViewModel : ViewModel() {
                     // Send a verification email to the user
                     auth.currentUser?.sendEmailVerification()?.addOnCompleteListener { verificationTask ->
                         if (verificationTask.isSuccessful) {
-                            _authState.value = AuthState.Error("A verification email has been sent. Please verify your email to continue.")
+                            _authState.value = AuthState.Success("A verification email has been sent. Please verify your email to continue.")
                         } else {
                             _authState.value = AuthState.Error("Failed to send verification email: ${verificationTask.exception?.message}")
                         }
@@ -110,7 +112,7 @@ class AuthViewModel : ViewModel() {
             .addOnCompleteListener { task ->
                 if (task.isSuccessful) {
                     // Password reset email sent successfully
-                    _authState.value = AuthState.Error("A password reset email has been sent to $email. Please check your inbox.")
+                    _authState.value = AuthState.Success("A password reset email has been sent to $email. Please check your inbox.")
                 } else {
                     // Failed to send reset email
                     _authState.value = AuthState.Error(task.exception?.message ?: "Failed to send password reset email. Please try again.")
@@ -130,5 +132,6 @@ sealed class  AuthState {
     data object Authenticated : AuthState()
     data object UnAuthenticated : AuthState()
     data object Loading : AuthState()
+    data class Success(val message: String) : AuthState()
     data class Error(val message: String) : AuthState()
 }
