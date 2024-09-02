@@ -66,8 +66,8 @@ fun HomeScreen(navController: NavController, authViewModel: AuthViewModel){
         Spacer(modifier = Modifier.height(4.dp))
 
         Button(onClick = {
-            authViewModel.signout()
-        },
+            authViewModel.logout()
+        }, enabled = authState.value != AuthState.Loading, // Disable the button while loading
             colors = buttonColors,
             modifier = Modifier.width(120.dp),
         ) {

@@ -42,7 +42,7 @@ import com.example.istapp.nav.Routes
 
 
 @Composable
-fun LoginScreen(modifier: Modifier = Modifier, navController: NavController, authViewModel: AuthViewModel){
+fun LoginScreen(navController: NavController, authViewModel: AuthViewModel){
 
     val buttonColors = ButtonDefaults.buttonColors(
         containerColor = Color.Red,
@@ -155,7 +155,7 @@ fun LoginScreen(modifier: Modifier = Modifier, navController: NavController, aut
 
         Button(onClick = {
             authViewModel.login(email, passwordText)
-        },
+        }, enabled = authState.value != AuthState.Loading, //disable button while loading
             colors = buttonColors,
             modifier = Modifier.width(120.dp),
             ) {

@@ -16,7 +16,7 @@ fun NavGraph(modifier: Modifier = Modifier, authViewModel: AuthViewModel){
     val navController = rememberNavController() //Initializing navController
     NavHost(navController = navController, startDestination = Routes.login, builder = {
         composable(Routes.login, content = {
-            LoginScreen(modifier, navController, authViewModel)
+            LoginScreen(navController, authViewModel)
         })
         composable(Routes.signup, content = {
             SignupScreen(navController, authViewModel)

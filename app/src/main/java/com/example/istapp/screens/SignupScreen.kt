@@ -155,7 +155,7 @@ fun SignupScreen(navController: NavController, authViewModel: AuthViewModel){
 
         Button(onClick = {
             authViewModel.signup(email, password)
-        },
+        }, enabled = authState.value != AuthState.Loading, // Disable the button while loading
             colors = buttonColors,
             modifier = Modifier.width(120.dp),
         ) {
