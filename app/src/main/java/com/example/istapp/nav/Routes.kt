@@ -5,4 +5,5 @@ object Routes {
     var login = "login"
     var signup = "signup"
     var forgotPassword = "forgotPassword"
+    var homepage = "home"
 }

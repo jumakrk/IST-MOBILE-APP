@@ -32,12 +32,13 @@ import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
+import com.example.istapp.AuthViewModel
 import com.example.istapp.R
 import com.example.istapp.nav.Routes
 
 
 @Composable
-fun LoginScreen(navController: NavController){
+fun LoginScreen(modifier: Modifier = Modifier, navController: NavController, authViewModel: AuthViewModel){
 
     val buttonColors = ButtonDefaults.buttonColors(
         containerColor = Color.Red,
