@@ -123,7 +123,6 @@ class AuthViewModel : ViewModel() {
                 _authState.value = AuthState.Error(exception.message ?: "Failed to send password reset email. Please try again.")
             }
     }
-
 }
 
 

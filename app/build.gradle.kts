@@ -75,4 +75,7 @@ dependencies {
 
     val nav_version = "2.7.7"
     implementation("androidx.navigation:navigation-compose:$nav_version")
+
+    // Google Sign-In
+    implementation("com.google.android.gms:play-services-auth:20.7.0")
 }

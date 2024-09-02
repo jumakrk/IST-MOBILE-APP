@@ -1,6 +1,12 @@
 package com.example.istapp.screens
 
+import android.content.Intent
+import android.util.Log
 import android.widget.Toast
+import androidx.activity.compose.ManagedActivityResultLauncher
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.ActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -29,6 +35,7 @@ import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.VisualTransformation
@@ -39,6 +46,15 @@ import com.example.istapp.AuthState
 import com.example.istapp.AuthViewModel
 import com.example.istapp.R
 import com.example.istapp.nav.Routes
+import com.google.android.gms.auth.api.signin.GoogleSignIn
+import com.google.android.gms.auth.api.signin.GoogleSignInOptions
+import com.google.android.gms.common.api.ApiException
+import com.google.firebase.Firebase
+import com.google.firebase.auth.AuthResult
+import com.google.firebase.auth.GoogleAuthProvider
+import com.google.firebase.auth.auth
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.tasks.await
 
 
 @Composable
@@ -49,11 +65,21 @@ fun LoginScreen(navController: NavController, authViewModel: AuthViewModel){
         contentColor = Color.White
     )
 
+
     var passwordVisible by remember { mutableStateOf(false) }
     var passwordText by remember { mutableStateOf("") }
     var passwordIsFocused by remember { mutableStateOf(false) }
 
     val authState = authViewModel.authState.observeAsState()
+
+
+    var user by remember { mutableStateOf(Firebase.auth.currentUser) }
+    val launcher = rememberFirebaseAuthLauncher(onAuthComplete = { result ->
+        user = result.user
+    }, onAuthError = {
+        user = null
+    })
+    val token = stringResource(id = R.string.google_client_id)
     val context = LocalContext.current
 
     LaunchedEffect(authState.value){
@@ -198,12 +224,45 @@ fun LoginScreen(navController: NavController, authViewModel: AuthViewModel){
             modifier = Modifier.fillMaxWidth(),
             horizontalArrangement = Arrangement.SpaceEvenly
         ){
+            //Google Authentication
             Image(painter = painterResource(id = R.drawable.google_logo), contentDescription ="Facebook Logo",
                 modifier = Modifier
                     .size(30.dp)
                     .clickable {
-                        // Handle Google login
+                        val gso = GoogleSignInOptions.Builder(
+                            GoogleSignInOptions
+                            .DEFAULT_SIGN_IN)
+                            .requestIdToken(token)
+                            .requestEmail()
+                            .build()
+
+                        val googleSignInClient = GoogleSignIn.getClient(context, gso)
+                        launcher.launch(googleSignInClient.signInIntent)
                     })
         }
     }
+}
+
+@Composable
+fun rememberFirebaseAuthLauncher(
+    onAuthComplete: (AuthResult) -> Unit,
+    onAuthError: (ApiException) -> Unit
+): ManagedActivityResultLauncher<Intent, ActivityResult> {
+    val scope = rememberCoroutineScope()
+
+    return rememberLauncherForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
+        val task = GoogleSignIn.getSignedInAccountFromIntent(result.data)
+        try {
+            val account = task.getResult(ApiException::class.java)
+            Log.d("GoogleAuth", "account $account")
+
+            val credential = GoogleAuthProvider.getCredential(account.idToken!!, null)
+            scope.launch {
+                val authResult = Firebase.auth.signInWithCredential(credential).await()
+                onAuthComplete(authResult)
+            }
+        }catch (e: ApiException){
+            Log.d("GoogleAuth", e.toString())
+            onAuthError(e)
+        }}
 }

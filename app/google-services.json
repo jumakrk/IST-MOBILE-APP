@@ -14,6 +14,14 @@
       },
       "oauth_client": [
         {
+          "client_id": "63951166264-7pm2fbdt4r3s2gbf7689rokuvdft9a6b.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.example.istapp",
+            "certificate_hash": "657dbc16bc9b42098715b4695eadf8b1766c704b"
+          }
+        },
+        {
           "client_id": "63951166264-0dlltcd2mcs7tmdd8gql719qp2a8hdsa.apps.googleusercontent.com",
           "client_type": 3
         }

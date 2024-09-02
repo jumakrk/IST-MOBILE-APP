@@ -29,6 +29,7 @@ import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.VisualTransformation
@@ -39,6 +40,11 @@ import com.example.istapp.AuthState
 import com.example.istapp.AuthViewModel
 import com.example.istapp.R
 import com.example.istapp.nav.Routes
+import com.google.android.gms.auth.api.signin.GoogleSignIn
+import com.google.android.gms.auth.api.signin.GoogleSignInOptions
+import com.google.firebase.Firebase
+import com.google.firebase.auth.auth
+
 
 
 @Composable
@@ -54,6 +60,14 @@ fun SignupScreen(navController: NavController, authViewModel: AuthViewModel){
     var passwordIsFocused by remember { mutableStateOf(false) }
 
     val authState = authViewModel.authState.observeAsState()
+
+    var user by remember { mutableStateOf(Firebase.auth.currentUser) }
+    val launcher = rememberFirebaseAuthLauncher(onAuthComplete = { result ->
+                                                                user = result.user
+    }, onAuthError = {
+        user = null
+    })
+    val token = stringResource(id = R.string.google_client_id)
     val context = LocalContext.current
 
     LaunchedEffect(authState.value){
@@ -148,7 +162,7 @@ fun SignupScreen(navController: NavController, authViewModel: AuthViewModel){
                 contentDescription =  if (passwordVisible) "Hide Password" else "Show Password",
                 modifier = Modifier
                     .size(16.dp)
-                    .clickable {passwordVisible = !passwordVisible})
+                    .clickable { passwordVisible = !passwordVisible })
             })
 
         Spacer(modifier = Modifier.height(16.dp))
@@ -197,7 +211,14 @@ fun SignupScreen(navController: NavController, authViewModel: AuthViewModel){
                 modifier = Modifier
                     .size(30.dp)
                     .clickable {
-                        // Handle Google login
+                        val gso = GoogleSignInOptions.Builder(GoogleSignInOptions
+                            .DEFAULT_SIGN_IN)
+                            .requestIdToken(token)
+                            .requestEmail()
+                            .build()
+
+                        val googleSignInClient = GoogleSignIn.getClient(context, gso)
+                        launcher.launch(googleSignInClient.signInIntent)
                     })
         }
     }

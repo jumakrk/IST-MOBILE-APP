@@ -1,3 +1,4 @@
 <resources>
-    <string name="app_name">IST App</string>
+    <string name="app_name" translatable="false">IST App</string>
+    <string name="google_client_id">63951166264-0dlltcd2mcs7tmdd8gql719qp2a8hdsa.apps.googleusercontent.com</string>
 </resources>
