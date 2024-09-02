@@ -37,16 +37,12 @@ import com.example.istapp.nav.Routes
 
 
 @Composable
-fun LoginScreen(navController: NavController){
+fun ForgotPasswordScreen(navController: NavController){
 
     val buttonColors = ButtonDefaults.buttonColors(
         containerColor = Color.Red,
         contentColor = Color.White
     )
-
-    var passwordVisible by remember { mutableStateOf(false) }
-    var passwordText by remember { mutableStateOf("") }
-    var passwordIsFocused by remember { mutableStateOf(false) }
 
     var email by remember { mutableStateOf("") }
     var emailIsFocused by remember { mutableStateOf(false) }
@@ -64,13 +60,13 @@ fun LoginScreen(navController: NavController){
 
         Spacer(modifier = Modifier.height(16.dp))
 
-        Text(text = "Welcome Back",
+        Text(text = "Forgot Password?",
             fontSize = 28.sp,
             fontWeight = FontWeight.Bold)
 
         Spacer(modifier = Modifier.height(4.dp))
 
-        Text(text = "Please login to continue",
+        Text(text = "Please enter your Email to reset your password",
             fontSize = 16.sp,
             color = Color.Gray,
         )
@@ -100,54 +96,12 @@ fun LoginScreen(navController: NavController){
 
         Spacer(modifier = Modifier.height(16.dp))
 
-        // Change icon according to the password state
-        val icon = if (passwordVisible) {
-            R.drawable.hide_icon
-        } else {
-            R.drawable.show_icon
-        }
-
-        OutlinedTextField(value = passwordText, onValueChange ={passwordText = it},
-            label = {
-                Text(
-                    text = "Password",
-                    color = if (passwordIsFocused) Color.Red else Color.Gray
-                )},
-            colors = OutlinedTextFieldDefaults.colors(
-                focusedBorderColor = Color.Red,
-                unfocusedBorderColor = Color.Gray,
-                focusedLabelColor = Color.Red,
-                unfocusedLabelColor = Color.Gray,
-                cursorColor = Color.Red
-            ),
-            modifier = Modifier
-                .width(300.dp)
-                .focusRequester(focusRequester)
-                .onFocusChanged { focusState ->
-                    passwordIsFocused = focusState.isFocused
-                },
-            visualTransformation = if (passwordVisible) VisualTransformation.None else PasswordVisualTransformation(),
-            trailingIcon = { Icon(painter = painterResource(id = icon),
-                contentDescription =  if (passwordVisible) "Hide Password" else "Show Password",
-                modifier = Modifier
-                    .size(16.dp)
-                    .clickable {passwordVisible = !passwordVisible})
-            })
-
-        Spacer(modifier = Modifier.height(16.dp))
-
-        Button(onClick = { /*TODO*/ },
+        Button(onClick = {},
             colors = buttonColors,
-            modifier = Modifier.width(120.dp),
-            ) {
-            Text(text = "Login")
+            modifier = Modifier.width(150.dp),
+        ) {
+            Text(text = "Reset Password")
         }
-
-        Spacer(modifier = Modifier.height(16.dp))
-
-        Text(text = "Forgot Password?",
-            Modifier.clickable {navController.navigate(Routes.forgotPassword)},
-            color = Color.Gray)
 
         Spacer(modifier = Modifier.height(16.dp))
 
@@ -159,47 +113,6 @@ fun LoginScreen(navController: NavController){
             Text(text = "Sign Up",
                 Modifier.clickable {navController.navigate(Routes.signup)},
                 color = Color.Gray)
-        }
-
-        Spacer(modifier = Modifier.height(16.dp))
-
-        Text(text = "or",
-            color = Color.Black,
-            fontWeight = FontWeight.Bold)
-
-        Spacer(modifier = Modifier.height(16.dp))
-
-        Text(text = "Sign in with",
-            color = Color.Black,
-            fontWeight = FontWeight.Bold)
-
-        Spacer(modifier = Modifier.height(20.dp))
-
-        Row(
-            modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.SpaceEvenly
-        ){
-            Image(painter = painterResource(id = R.drawable.facebook_logo), contentDescription ="Google Logo",
-                modifier = Modifier
-                    .size(30.dp)
-                    .clickable {
-                        // Handle Facebook login
-                    })
-
-            Image(painter = painterResource(id = R.drawable.google_logo), contentDescription ="Facebook Logo",
-                modifier = Modifier
-                    .size(30.dp)
-                    .clickable {
-                        // Handle Google login
-                    })
-
-            Image(painter = painterResource(id = R.drawable.twitter_logo), contentDescription ="Twitter Logo",
-                modifier = Modifier
-                    .size(30.dp)
-                    .clickable {
-                        // Handle Twitter login
-                    })
-
         }
     }
 }

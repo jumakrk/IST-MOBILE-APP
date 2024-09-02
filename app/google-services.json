@@ -12,7 +12,12 @@
           "package_name": "com.example.istapp"
         }
       },
-      "oauth_client": [],
+      "oauth_client": [
+        {
+          "client_id": "63951166264-0dlltcd2mcs7tmdd8gql719qp2a8hdsa.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
       "api_key": [
         {
           "current_key": "AIzaSyBEyPl_H2zt87572ihvHYZ-wOtRm3sHOno"
@@ -20,7 +25,12 @@
       ],
       "services": {
         "appinvite_service": {
-          "other_platform_oauth_client": []
+          "other_platform_oauth_client": [
+            {
+              "client_id": "63951166264-0dlltcd2mcs7tmdd8gql719qp2a8hdsa.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
         }
       }
     }

@@ -4,6 +4,7 @@ import androidx.compose.runtime.Composable
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
+import com.example.istapp.screens.ForgotPasswordScreen
 import com.example.istapp.screens.LoginScreen
 import com.example.istapp.screens.SignupScreen
 
@@ -16,6 +17,9 @@ fun NavGraph(){
         })
         composable(Routes.signup, content = {
             SignupScreen(navController)
+        })
+        composable(Routes.forgotPassword, content = {
+            ForgotPasswordScreen(navController)
         })
     })
 }

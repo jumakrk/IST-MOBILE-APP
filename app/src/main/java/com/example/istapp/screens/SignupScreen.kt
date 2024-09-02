@@ -45,7 +45,7 @@ fun SignupScreen(navController: NavController){
     )
 
     var passwordVisible by remember { mutableStateOf(false) }
-    var passwordText by remember { mutableStateOf("") }
+    var password by remember { mutableStateOf("") }
     var passwordIsFocused by remember { mutableStateOf(false) }
 
     var email by remember { mutableStateOf("") }
@@ -107,7 +107,7 @@ fun SignupScreen(navController: NavController){
             R.drawable.show_icon
         }
 
-        OutlinedTextField(value = passwordText, onValueChange ={passwordText = it},
+        OutlinedTextField(value = password, onValueChange ={password = it},
             label = {
                 Text(
                     text = "Password",
@@ -136,7 +136,7 @@ fun SignupScreen(navController: NavController){
 
         Spacer(modifier = Modifier.height(16.dp))
 
-        Button(onClick = { /*TODO*/ },
+        Button(onClick = {},
             colors = buttonColors,
             modifier = Modifier.width(120.dp),
         ) {
@@ -193,7 +193,6 @@ fun SignupScreen(navController: NavController){
                     .clickable {
                         // Handle Twitter login
                     })
-
         }
     }
 }
