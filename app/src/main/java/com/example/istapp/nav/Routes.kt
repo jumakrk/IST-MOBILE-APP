@@ -6,4 +6,5 @@ object Routes {
     var signup = "signup"
     var forgotPassword = "forgotPassword"
     var homepage = "home"
+    var verificationEmailSent = "verificationEmailSent"
 }

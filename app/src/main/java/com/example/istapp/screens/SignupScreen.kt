@@ -45,10 +45,8 @@ import com.google.android.gms.auth.api.signin.GoogleSignInOptions
 import com.google.firebase.Firebase
 import com.google.firebase.auth.auth
 
-
-
 @Composable
-fun SignupScreen(navController: NavController, authViewModel: AuthViewModel){
+fun SignupScreen(navController: NavController, authViewModel: AuthViewModel) {
 
     val buttonColors = ButtonDefaults.buttonColors(
         containerColor = Color.Red,
@@ -63,18 +61,22 @@ fun SignupScreen(navController: NavController, authViewModel: AuthViewModel){
 
     var user by remember { mutableStateOf(Firebase.auth.currentUser) }
     val launcher = rememberFirebaseAuthLauncher(onAuthComplete = { result ->
-                                                                user = result.user
+        user = result.user
     }, onAuthError = {
         user = null
     })
     val token = stringResource(id = R.string.google_client_id)
     val context = LocalContext.current
 
-    LaunchedEffect(authState.value){
-        when(authState.value){
-            is AuthState.Authenticated -> navController.navigate(Routes.homepage)
-            is AuthState.Error -> Toast.makeText(context,
-                (authState.value as AuthState.Error).message, Toast.LENGTH_SHORT).show()
+    LaunchedEffect(authState.value) {
+        when (authState.value) {
+            is AuthState.Authenticated -> {
+                Toast.makeText(context, "Sign Up Successful", Toast.LENGTH_SHORT).show()
+                navController.navigate(Routes.homepage)
+            }
+            is AuthState.Error -> {
+                Toast.makeText(context, (authState.value as AuthState.Error).message, Toast.LENGTH_SHORT).show()
+            }
             else -> Unit
         }
     }
@@ -90,7 +92,7 @@ fun SignupScreen(navController: NavController, authViewModel: AuthViewModel){
         verticalArrangement = Arrangement.Center,
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        Image(painter = painterResource(id = R.drawable.ist_logo), contentDescription ="IST Logo",
+        Image(painter = painterResource(id = R.drawable.ist_logo), contentDescription = "IST Logo",
             modifier = Modifier.size(150.dp))
 
         Spacer(modifier = Modifier.height(16.dp))
@@ -108,12 +110,13 @@ fun SignupScreen(navController: NavController, authViewModel: AuthViewModel){
 
         Spacer(modifier = Modifier.height(16.dp))
 
-        OutlinedTextField(value = email, onValueChange ={email = it},
+        OutlinedTextField(value = email, onValueChange = { email = it },
             label = {
                 Text(
                     text = "Email",
                     color = if (emailIsFocused) Color.Red else Color.Gray
-                )},
+                )
+            },
             colors = OutlinedTextFieldDefaults.colors(
                 focusedBorderColor = Color.Red,
                 unfocusedBorderColor = Color.Gray,
@@ -138,12 +141,13 @@ fun SignupScreen(navController: NavController, authViewModel: AuthViewModel){
             R.drawable.show_icon
         }
 
-        OutlinedTextField(value = password, onValueChange ={password = it},
+        OutlinedTextField(value = password, onValueChange = { password = it },
             label = {
                 Text(
                     text = "Password",
                     color = if (passwordIsFocused) Color.Red else Color.Gray
-                )},
+                )
+            },
             colors = OutlinedTextFieldDefaults.colors(
                 focusedBorderColor = Color.Red,
                 unfocusedBorderColor = Color.Gray,
@@ -158,17 +162,21 @@ fun SignupScreen(navController: NavController, authViewModel: AuthViewModel){
                     passwordIsFocused = focusState.isFocused
                 },
             visualTransformation = if (passwordVisible) VisualTransformation.None else PasswordVisualTransformation(),
-            trailingIcon = { Icon(painter = painterResource(id = icon),
-                contentDescription =  if (passwordVisible) "Hide Password" else "Show Password",
-                modifier = Modifier
-                    .size(16.dp)
-                    .clickable { passwordVisible = !passwordVisible })
+            trailingIcon = {
+                Icon(
+                    painter = painterResource(id = icon),
+                    contentDescription = if (passwordVisible) "Hide Password" else "Show Password",
+                    modifier = Modifier
+                        .size(16.dp)
+                        .clickable { passwordVisible = !passwordVisible }
+                )
             })
 
         Spacer(modifier = Modifier.height(16.dp))
 
         Button(onClick = {
             authViewModel.signup(email, password)
+            navController.navigate(Routes.verificationEmailSent)
         }, enabled = authState.value != AuthState.Loading, // Disable the button while loading
             colors = buttonColors,
             modifier = Modifier.width(120.dp),
@@ -184,7 +192,7 @@ fun SignupScreen(navController: NavController, authViewModel: AuthViewModel){
                 fontWeight = FontWeight.Bold)
 
             Text(text = "Login",
-                Modifier.clickable {navController.navigate(Routes.login)},
+                Modifier.clickable { navController.navigate(Routes.login) },
                 color = Color.Gray)
         }
 
@@ -205,9 +213,9 @@ fun SignupScreen(navController: NavController, authViewModel: AuthViewModel){
         Row(
             modifier = Modifier.fillMaxWidth(),
             horizontalArrangement = Arrangement.SpaceEvenly
-        ){
+        ) {
 
-            Image(painter = painterResource(id = R.drawable.google_logo), contentDescription ="Facebook Logo",
+            Image(painter = painterResource(id = R.drawable.google_logo), contentDescription = "Google Logo",
                 modifier = Modifier
                     .size(30.dp)
                     .clickable {
