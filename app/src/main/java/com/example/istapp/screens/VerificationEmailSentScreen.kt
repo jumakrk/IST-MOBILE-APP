@@ -94,7 +94,7 @@ fun VerificationEmailSentScreen(navController: NavController, authViewModel: Aut
 
         Spacer(modifier = Modifier.height(4.dp))
 
-        Text(text = "A verification email has been sent to your email. Please check your inbox to verify your account.",
+        Text(text = "A verification email has been sent to your email.",
             fontSize = 16.sp,
             color = Color.Gray,
         )
