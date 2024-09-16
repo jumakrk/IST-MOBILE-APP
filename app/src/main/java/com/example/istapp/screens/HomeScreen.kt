@@ -13,7 +13,6 @@ import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -22,26 +21,33 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
-import com.example.istapp.AuthState
 import com.example.istapp.AuthViewModel
 import com.example.istapp.R
 import com.example.istapp.nav.Routes
+import com.google.firebase.auth.FirebaseAuth
 
 
 @Composable
-fun HomeScreen(navController: NavController, authViewModel: AuthViewModel){
+fun HomeScreen(navController: NavController, authViewModel: AuthViewModel) {
 
     val buttonColors = ButtonDefaults.buttonColors(
         containerColor = Color.Red,
         contentColor = Color.White
     )
 
-    val authState = authViewModel.authState.observeAsState()
+    val currentUser = FirebaseAuth.getInstance().currentUser // Get the current user
 
-    LaunchedEffect(authState.value){
-        when(authState.value){
-            is AuthState.UnAuthenticated -> navController.navigate(Routes.login)
-            else -> Unit
+    LaunchedEffect(currentUser) {
+        // If the user is not signed in, navigate to the login screen
+        if (currentUser == null) {
+            navController.navigate(Routes.login) {
+                popUpTo(Routes.homepage) { inclusive = true } // Clear the backstack
+            }
+        } else if (!currentUser.isEmailVerified) {
+            // If email is not verified, navigate to an email verification page
+            navController.navigate(Routes.verificationEmailSent) {
+                popUpTo(Routes.homepage) { inclusive = true } // Clear the backstack
+            }
         }
     }
 
@@ -51,7 +57,8 @@ fun HomeScreen(navController: NavController, authViewModel: AuthViewModel){
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
         Image(
-            painter = painterResource(id = R.drawable.ist_logo), contentDescription = "IST Logo",
+            painter = painterResource(id = R.drawable.ist_logo),
+            contentDescription = "IST Logo",
             modifier = Modifier.size(150.dp)
         )
 
@@ -65,13 +72,14 @@ fun HomeScreen(navController: NavController, authViewModel: AuthViewModel){
 
         Spacer(modifier = Modifier.height(4.dp))
 
-        Button(onClick = {
-            authViewModel.logout()
-        }, enabled = authState.value != AuthState.Loading, // Disable the button while loading
+        Button(
+            onClick = {
+                authViewModel.logout() // Ensure this logs the user out of Firebase
+            },
             colors = buttonColors,
-            modifier = Modifier.width(120.dp),
+            modifier = Modifier.width(120.dp)
         ) {
-            Text(text = "Sign Out")
+            Text(text = "Log Out")
         }
     }
 }

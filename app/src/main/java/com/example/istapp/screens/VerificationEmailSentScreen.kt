@@ -99,6 +99,13 @@ fun VerificationEmailSentScreen(navController: NavController, authViewModel: Aut
             color = Color.Gray,
         )
 
+        Spacer(modifier = Modifier.height(4.dp))
+
+        Text(text = "Please check your inbox and verify your email.",
+            fontSize = 16.sp,
+            color = Color.Gray,
+        )
+
         Spacer(modifier = Modifier.height(16.dp))
 
         Row {

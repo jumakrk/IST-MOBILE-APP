@@ -14,6 +14,7 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.OutlinedTextFieldDefaults
@@ -27,6 +28,10 @@ import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.input.key.Key
+import androidx.compose.ui.input.key.KeyEvent
+import androidx.compose.ui.input.key.key
+import androidx.compose.ui.input.key.onKeyEvent
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
@@ -87,6 +92,14 @@ fun SignupScreen(navController: NavController, authViewModel: AuthViewModel) {
     // FocusRequester to handle the focus state
     val focusRequester = remember { FocusRequester() }
 
+    // For preventing action on Enter key
+    fun handleKeyEvent(keyEvent: KeyEvent): Boolean {
+        return when (keyEvent.key) {
+            Key.Enter -> true // Prevent any action on Enter key
+            else -> false
+        }
+    }
+
     Column(
         modifier = Modifier.fillMaxSize(),
         verticalArrangement = Arrangement.Center,
@@ -110,7 +123,7 @@ fun SignupScreen(navController: NavController, authViewModel: AuthViewModel) {
 
         Spacer(modifier = Modifier.height(16.dp))
 
-        OutlinedTextField(value = email, onValueChange = { email = it },
+        OutlinedTextField(value = email, onValueChange = { email = it.trim() },
             label = {
                 Text(
                     text = "Email",
@@ -127,9 +140,8 @@ fun SignupScreen(navController: NavController, authViewModel: AuthViewModel) {
             modifier = Modifier
                 .width(300.dp)
                 .focusRequester(focusRequester)
-                .onFocusChanged { focusState ->
-                    emailIsFocused = focusState.isFocused
-                }
+                .onFocusChanged { focusState -> emailIsFocused = focusState.isFocused }
+                .onKeyEvent { handleKeyEvent(it) }
         )
 
         Spacer(modifier = Modifier.height(16.dp))
@@ -141,7 +153,7 @@ fun SignupScreen(navController: NavController, authViewModel: AuthViewModel) {
             R.drawable.show_icon
         }
 
-        OutlinedTextField(value = password, onValueChange = { password = it },
+        OutlinedTextField(value = password, onValueChange = { password = it.trim() },
             label = {
                 Text(
                     text = "Password",
@@ -158,9 +170,8 @@ fun SignupScreen(navController: NavController, authViewModel: AuthViewModel) {
             modifier = Modifier
                 .width(300.dp)
                 .focusRequester(focusRequester)
-                .onFocusChanged { focusState ->
-                    passwordIsFocused = focusState.isFocused
-                },
+                .onFocusChanged { focusState -> passwordIsFocused = focusState.isFocused }
+                .onKeyEvent { handleKeyEvent(it) },
             visualTransformation = if (passwordVisible) VisualTransformation.None else PasswordVisualTransformation(),
             trailingIcon = {
                 Icon(
@@ -181,7 +192,14 @@ fun SignupScreen(navController: NavController, authViewModel: AuthViewModel) {
             colors = buttonColors,
             modifier = Modifier.width(120.dp),
         ) {
-            Text(text = "Sign Up")
+            if (authState.value is AuthState.Loading) {
+                CircularProgressIndicator(
+                    color = Color.Red,
+                    modifier = Modifier.size(24.dp)
+                )
+            } else {
+                Text(text = "Sign Up")
+            }
         }
 
         Spacer(modifier = Modifier.height(16.dp))

@@ -12,6 +12,7 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.OutlinedTextFieldDefaults
@@ -24,6 +25,10 @@ import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.input.key.Key
+import androidx.compose.ui.input.key.KeyEvent
+import androidx.compose.ui.input.key.key
+import androidx.compose.ui.input.key.onKeyEvent
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
@@ -98,7 +103,15 @@ fun LoginScreen(navController: NavController, authViewModel: AuthViewModel) {
     var email by remember { mutableStateOf("") }
     var emailIsFocused by remember { mutableStateOf(false) }
 
-    val focusRequester = remember { FocusRequester() }
+    val focusRequester = remember { FocusRequester()}
+
+    // For preventing action on Enter key
+    fun handleKeyEvent(keyEvent: KeyEvent): Boolean {
+        return when (keyEvent.key) {
+            Key.Enter -> true // Prevent any action on Enter key
+            else -> false
+        }
+    }
 
     Column(
         modifier = Modifier.fillMaxSize(),
@@ -131,7 +144,7 @@ fun LoginScreen(navController: NavController, authViewModel: AuthViewModel) {
 
         OutlinedTextField(
             value = email,
-            onValueChange = { email = it },
+            onValueChange = { email = it.trim() },
             label = {
                 Text(
                     text = "Email",
@@ -148,9 +161,8 @@ fun LoginScreen(navController: NavController, authViewModel: AuthViewModel) {
             modifier = Modifier
                 .width(300.dp)
                 .focusRequester(focusRequester)
-                .onFocusChanged { focusState ->
-                    emailIsFocused = focusState.isFocused
-                }
+                .onFocusChanged { focusState -> emailIsFocused = focusState.isFocused}
+                .onKeyEvent { handleKeyEvent(it) }
         )
 
         Spacer(modifier = Modifier.height(16.dp))
@@ -159,7 +171,7 @@ fun LoginScreen(navController: NavController, authViewModel: AuthViewModel) {
 
         OutlinedTextField(
             value = passwordText,
-            onValueChange = { passwordText = it },
+            onValueChange = { passwordText = it.trim() },
             label = {
                 Text(
                     text = "Password",
@@ -176,9 +188,8 @@ fun LoginScreen(navController: NavController, authViewModel: AuthViewModel) {
             modifier = Modifier
                 .width(300.dp)
                 .focusRequester(focusRequester)
-                .onFocusChanged { focusState ->
-                    passwordIsFocused = focusState.isFocused
-                },
+                .onFocusChanged { focusState -> passwordIsFocused = focusState.isFocused }
+                .onKeyEvent { handleKeyEvent(it) },
             visualTransformation = if (passwordVisible) VisualTransformation.None else PasswordVisualTransformation(),
             trailingIcon = {
                 Icon(
@@ -201,7 +212,14 @@ fun LoginScreen(navController: NavController, authViewModel: AuthViewModel) {
             colors = buttonColors,
             modifier = Modifier.width(120.dp)
         ) {
-            Text(text = "Login")
+            if (authState is AuthState.Loading) {
+                CircularProgressIndicator(
+                    color = Color.Red,
+                    modifier = Modifier.size(24.dp)
+                )
+            } else {
+                Text(text = "Login")
+            }
         }
 
         Spacer(modifier = Modifier.height(16.dp))

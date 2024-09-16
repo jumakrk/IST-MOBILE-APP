@@ -13,6 +13,7 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.Text
@@ -25,6 +26,10 @@ import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.input.key.Key
+import androidx.compose.ui.input.key.KeyEvent
+import androidx.compose.ui.input.key.key
+import androidx.compose.ui.input.key.onKeyEvent
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
@@ -63,6 +68,14 @@ fun ForgotPasswordScreen(navController: NavController, authViewModel: AuthViewMo
     // FocusRequester to handle the focus state
     val focusRequester = remember { FocusRequester() }
 
+    // For preventing action on Enter key
+    fun handleKeyEvent(keyEvent: KeyEvent): Boolean {
+        return when (keyEvent.key) {
+            Key.Enter -> true // Prevent any action on Enter key
+            else -> false
+        }
+    }
+
     Column(
         modifier = Modifier.fillMaxSize(),
         verticalArrangement = Arrangement.Center,
@@ -86,7 +99,7 @@ fun ForgotPasswordScreen(navController: NavController, authViewModel: AuthViewMo
 
         Spacer(modifier = Modifier.height(16.dp))
 
-        OutlinedTextField(value = email, onValueChange ={email = it},
+        OutlinedTextField(value = email, onValueChange ={email = it.trim() },
             label = {
                 Text(
                     text = "Email",
@@ -102,9 +115,8 @@ fun ForgotPasswordScreen(navController: NavController, authViewModel: AuthViewMo
             modifier = Modifier
                 .width(300.dp)
                 .focusRequester(focusRequester)
-                .onFocusChanged { focusState ->
-                    emailIsFocused = focusState.isFocused
-                }
+                .onFocusChanged { focusState -> emailIsFocused = focusState.isFocused}
+                .onKeyEvent { handleKeyEvent(it) }
         )
 
         Spacer(modifier = Modifier.height(16.dp))
@@ -115,7 +127,14 @@ fun ForgotPasswordScreen(navController: NavController, authViewModel: AuthViewMo
             colors = buttonColors,
             modifier = Modifier.width(150.dp),
         ) {
-            Text(text = "Reset Password")
+            if (authState.value == AuthState.Loading) {
+                CircularProgressIndicator(
+                    modifier = Modifier.size(24.dp),
+                    color = Color.White,
+                )
+                } else {
+                Text(text = "Reset Password")
+            }
         }
 
         Spacer(modifier = Modifier.height(16.dp))
