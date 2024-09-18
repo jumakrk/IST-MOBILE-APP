@@ -47,49 +47,59 @@ import com.example.istapp.R
 import com.example.istapp.nav.Routes
 import com.google.android.gms.auth.api.signin.GoogleSignIn
 import com.google.android.gms.auth.api.signin.GoogleSignInOptions
-import com.google.firebase.Firebase
-import com.google.firebase.auth.auth
+import com.google.firebase.auth.FirebaseAuth
 
 @Composable
 fun SignupScreen(navController: NavController, authViewModel: AuthViewModel) {
-
+    val context = LocalContext.current
     val buttonColors = ButtonDefaults.buttonColors(
         containerColor = Color.Red,
         contentColor = Color.White
     )
 
     var passwordVisible by remember { mutableStateOf(false) }
-    var password by remember { mutableStateOf("") }
+    var passwordText by remember { mutableStateOf("") }
     var passwordIsFocused by remember { mutableStateOf(false) }
 
-    val authState = authViewModel.authState.observeAsState()
+    val authState by authViewModel.authState.observeAsState(AuthState.Loading)
+    var user by remember { mutableStateOf(FirebaseAuth.getInstance().currentUser) }
 
-    var user by remember { mutableStateOf(Firebase.auth.currentUser) }
-    val launcher = rememberFirebaseAuthLauncher(onAuthComplete = { result ->
-        user = result.user
-    }, onAuthError = {
-        user = null
-    })
+    val launcher = rememberFirebaseAuthLauncher(
+        onAuthComplete = { result ->
+            user = result.user
+            Toast.makeText(context, "SignIn with Google successful!", Toast.LENGTH_SHORT).show()
+            // Navigate to homepage after successful sign-up
+            navController.navigate(Routes.homepage) {
+                popUpTo(Routes.signup) { inclusive = true }
+            }
+        },
+        onAuthError = { exception ->
+            user = null
+            Toast.makeText(context, "Authentication failed: ${exception.localizedMessage}", Toast.LENGTH_SHORT).show()
+        }
+    )
+
     val token = stringResource(id = R.string.google_client_id)
-    val context = LocalContext.current
 
-    LaunchedEffect(authState.value) {
-        when (authState.value) {
-            is AuthState.Authenticated -> {
-                Toast.makeText(context, "Sign Up Successful", Toast.LENGTH_SHORT).show()
-                navController.navigate(Routes.homepage)
+    LaunchedEffect(authState) {
+        if (authState is AuthState.Authenticated) {
+            Toast.makeText(context, "Sign-Up successful!", Toast.LENGTH_SHORT).show()
+            // Navigate to homepage on successful authentication
+            navController.navigate(Routes.homepage) {
+                popUpTo(Routes.signup) { inclusive = true }
             }
-            is AuthState.Error -> {
-                Toast.makeText(context, (authState.value as AuthState.Error).message, Toast.LENGTH_SHORT).show()
-            }
-            else -> Unit
+        } else if (authState is AuthState.Error) {
+            Toast.makeText(
+                context,
+                (authState as AuthState.Error).message,
+                Toast.LENGTH_SHORT
+            ).show()
         }
     }
 
     var email by remember { mutableStateOf("") }
     var emailIsFocused by remember { mutableStateOf(false) }
 
-    // FocusRequester to handle the focus state
     val focusRequester = remember { FocusRequester() }
 
     // For preventing action on Enter key
@@ -105,25 +115,33 @@ fun SignupScreen(navController: NavController, authViewModel: AuthViewModel) {
         verticalArrangement = Arrangement.Center,
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        Image(painter = painterResource(id = R.drawable.ist_logo), contentDescription = "IST Logo",
-            modifier = Modifier.size(150.dp))
-
-        Spacer(modifier = Modifier.height(16.dp))
-
-        Text(text = "Welcome",
-            fontSize = 28.sp,
-            fontWeight = FontWeight.Bold)
-
-        Spacer(modifier = Modifier.height(4.dp))
-
-        Text(text = "Please Create an account to continue",
-            fontSize = 16.sp,
-            color = Color.Gray,
+        Image(
+            painter = painterResource(id = R.drawable.ist_logo),
+            contentDescription = "IST Logo",
+            modifier = Modifier.size(150.dp)
         )
 
         Spacer(modifier = Modifier.height(16.dp))
 
-        OutlinedTextField(value = email, onValueChange = { email = it.trim() },
+        Text(
+            text = "Create an Account",
+            fontSize = 28.sp,
+            fontWeight = FontWeight.Bold
+        )
+
+        Spacer(modifier = Modifier.height(4.dp))
+
+        Text(
+            text = "Sign up to get started",
+            fontSize = 16.sp,
+            color = Color.Gray
+        )
+
+        Spacer(modifier = Modifier.height(16.dp))
+
+        OutlinedTextField(
+            value = email,
+            onValueChange = { email = it.trim() },
             label = {
                 Text(
                     text = "Email",
@@ -146,14 +164,11 @@ fun SignupScreen(navController: NavController, authViewModel: AuthViewModel) {
 
         Spacer(modifier = Modifier.height(16.dp))
 
-        // Change icon according to the password state
-        val icon = if (passwordVisible) {
-            R.drawable.hide_icon
-        } else {
-            R.drawable.show_icon
-        }
+        val icon = if (passwordVisible) R.drawable.hide_icon else R.drawable.show_icon
 
-        OutlinedTextField(value = password, onValueChange = { password = it.trim() },
+        OutlinedTextField(
+            value = passwordText,
+            onValueChange = { passwordText = it.trim() },
             label = {
                 Text(
                     text = "Password",
@@ -181,18 +196,20 @@ fun SignupScreen(navController: NavController, authViewModel: AuthViewModel) {
                         .size(16.dp)
                         .clickable { passwordVisible = !passwordVisible }
                 )
-            })
+            }
+        )
 
         Spacer(modifier = Modifier.height(16.dp))
 
-        Button(onClick = {
-            authViewModel.signup(email, password)
-            navController.navigate(Routes.verificationEmailSent)
-        }, enabled = authState.value != AuthState.Loading, // Disable the button while loading
+        Button(
+            onClick = {
+                authViewModel.signup(email, passwordText)
+            },
+            enabled = authState !is AuthState.Loading,
             colors = buttonColors,
-            modifier = Modifier.width(120.dp),
+            modifier = Modifier.width(120.dp)
         ) {
-            if (authState.value is AuthState.Loading) {
+            if (authState is AuthState.Loading) {
                 CircularProgressIndicator(
                     color = Color.Red,
                     modifier = Modifier.size(24.dp)
@@ -205,26 +222,34 @@ fun SignupScreen(navController: NavController, authViewModel: AuthViewModel) {
         Spacer(modifier = Modifier.height(16.dp))
 
         Row {
-            Text(text = "Already have an account? ",
+            Text(
+                text = "Already have an account? ",
                 color = Color.Black,
-                fontWeight = FontWeight.Bold)
+                fontWeight = FontWeight.Bold
+            )
 
-            Text(text = "Login",
+            Text(
+                text = "Log In",
                 Modifier.clickable { navController.navigate(Routes.login) },
-                color = Color.Gray)
+                color = Color.Gray
+            )
         }
 
         Spacer(modifier = Modifier.height(16.dp))
 
-        Text(text = "or",
+        Text(
+            text = "or",
             color = Color.Black,
-            fontWeight = FontWeight.Bold)
+            fontWeight = FontWeight.Bold
+        )
 
         Spacer(modifier = Modifier.height(16.dp))
 
-        Text(text = "Sign up with",
+        Text(
+            text = "Continue with",
             color = Color.Black,
-            fontWeight = FontWeight.Bold)
+            fontWeight = FontWeight.Bold
+        )
 
         Spacer(modifier = Modifier.height(20.dp))
 
@@ -232,20 +257,21 @@ fun SignupScreen(navController: NavController, authViewModel: AuthViewModel) {
             modifier = Modifier.fillMaxWidth(),
             horizontalArrangement = Arrangement.SpaceEvenly
         ) {
-
-            Image(painter = painterResource(id = R.drawable.google_logo), contentDescription = "Google Logo",
+            Image(
+                painter = painterResource(id = R.drawable.google_logo),
+                contentDescription = "Google Logo",
                 modifier = Modifier
                     .size(30.dp)
                     .clickable {
-                        val gso = GoogleSignInOptions.Builder(GoogleSignInOptions
-                            .DEFAULT_SIGN_IN)
+                        val gso = GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
                             .requestIdToken(token)
                             .requestEmail()
                             .build()
 
                         val googleSignInClient = GoogleSignIn.getClient(context, gso)
                         launcher.launch(googleSignInClient.signInIntent)
-                    })
+                    }
+            )
         }
     }
 }

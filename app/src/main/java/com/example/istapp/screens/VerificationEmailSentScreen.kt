@@ -35,14 +35,14 @@ fun VerificationEmailSentScreen(navController: NavController, authViewModel: Aut
     val context = LocalContext.current
 
     // State to manage button enable/disable and timer
-    var isButtonEnabled by remember { mutableStateOf(true) }
-    var timerText by remember { mutableStateOf("") }
+    var isButtonEnabled by remember { mutableStateOf(false) } // Initially disabled
+    var timerText by remember { mutableStateOf("Resend Email in 60 seconds") }
 
     // Check the email verification status periodically
     LaunchedEffect(Unit) {
         while (true) {
             authViewModel.checkEmailVerificationStatus()
-            delay(5000L) // Check if users email is verified every 5 seconds
+            delay(5000L) // Check if the user's email is verified every 5 seconds
         }
     }
 
@@ -64,18 +64,16 @@ fun VerificationEmailSentScreen(navController: NavController, authViewModel: Aut
         }
     }
 
-    // Timer logic for resend email button
-    LaunchedEffect(isButtonEnabled) {
-        if (!isButtonEnabled) {
-            var countdown = 60
-            while (countdown > 0) {
-                timerText = "Resend Email in $countdown seconds"
-                delay(1000L)
-                countdown--
-            }
-            isButtonEnabled = true
-            timerText = "You can resend the email again."
+    // Timer logic for resend email button starts automatically on page load
+    LaunchedEffect(Unit) {
+        var countdown = 60
+        while (countdown > 0) {
+            timerText = "Resend Email in $countdown seconds"
+            delay(1000L)
+            countdown--
         }
+        isButtonEnabled = true
+        timerText = "You can resend the email again."
     }
 
     Column(
@@ -83,25 +81,32 @@ fun VerificationEmailSentScreen(navController: NavController, authViewModel: Aut
         verticalArrangement = Arrangement.Center,
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        Image(painter = painterResource(id = R.drawable.ist_logo), contentDescription = "IST Logo",
-            modifier = Modifier.size(150.dp))
+        Image(
+            painter = painterResource(id = R.drawable.ist_logo),
+            contentDescription = "IST Logo",
+            modifier = Modifier.size(150.dp)
+        )
 
         Spacer(modifier = Modifier.height(16.dp))
 
-        Text(text = "Verification Email Sent!",
+        Text(
+            text = "Verification Email Sent!",
             fontSize = 28.sp,
-            fontWeight = FontWeight.Bold)
+            fontWeight = FontWeight.Bold
+        )
 
         Spacer(modifier = Modifier.height(4.dp))
 
-        Text(text = "A verification email has been sent to your email.",
+        Text(
+            text = "A verification email has been sent to your email.",
             fontSize = 16.sp,
             color = Color.Gray,
         )
 
         Spacer(modifier = Modifier.height(4.dp))
 
-        Text(text = "Please check your inbox and verify your email.",
+        Text(
+            text = "Please check your inbox and verify your email.",
             fontSize = 16.sp,
             color = Color.Gray,
         )
@@ -109,20 +114,23 @@ fun VerificationEmailSentScreen(navController: NavController, authViewModel: Aut
         Spacer(modifier = Modifier.height(16.dp))
 
         Row {
-            Text(text = "Didn't receive the email? ",
+            Text(
+                text = "Didn't receive the email? ",
                 color = Color.Black,
-                fontWeight = FontWeight.Bold)
+                fontWeight = FontWeight.Bold
+            )
         }
 
-        Button(onClick = {
-            if (isButtonEnabled) {
-                authViewModel.resendVerificationEmail()
-                isButtonEnabled = false // Disable button immediately after click
-            }
-        },
+        Button(
+            onClick = {
+                if (isButtonEnabled) {
+                    authViewModel.resendVerificationEmail()
+                    isButtonEnabled = false // Disable button immediately after click
+                }
+            },
             colors = buttonColors,
             modifier = Modifier.width(150.dp),
-            enabled = isButtonEnabled
+            enabled = isButtonEnabled // Button is enabled after countdown
         ) {
             Text(text = "Resend Email")
         }
