@@ -71,7 +71,7 @@ fun SignupScreen(navController: NavController, authViewModel: AuthViewModel) {
             isSigningIn = false // Set to false when sign-in completes
             user = result.user
             Toast.makeText(context, "SignIn with Google successful!", Toast.LENGTH_SHORT).show()
-            // Navigate to homepage after successful sign-up
+            // Navigate to homepage after successful google sign-up
             navController.navigate(Routes.homepage) {
                 popUpTo(Routes.signup) { inclusive = true }
             }
@@ -89,7 +89,7 @@ fun SignupScreen(navController: NavController, authViewModel: AuthViewModel) {
         if (authState is AuthState.Authenticated) {
             Toast.makeText(context, "Sign-Up successful!", Toast.LENGTH_SHORT).show()
             // Navigate to homepage on successful authentication
-            navController.navigate(Routes.homepage) {
+            navController.navigate(Routes.verificationEmailSent) {
                 popUpTo(Routes.signup) { inclusive = true }
             }
         } else if (authState is AuthState.Error) {
@@ -208,6 +208,7 @@ fun SignupScreen(navController: NavController, authViewModel: AuthViewModel) {
         Button(
             onClick = {
                 authViewModel.signup(email, passwordText)
+                navController.navigate(Routes.verificationEmailSent)
             },
             enabled = authState !is AuthState.Loading,
             colors = buttonColors,
