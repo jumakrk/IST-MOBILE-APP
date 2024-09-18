@@ -66,8 +66,11 @@ fun LoginScreen(navController: NavController, authViewModel: AuthViewModel) {
     val authState by authViewModel.authState.observeAsState(AuthState.Loading)
     var user by remember { mutableStateOf(FirebaseAuth.getInstance().currentUser) }
 
+    var isSigningIn by remember { mutableStateOf(false) } // Track if google sign-in is in progress
+
     val launcher = rememberFirebaseAuthLauncher(
         onAuthComplete = { result ->
+            isSigningIn = false // Set to false when sign-in completes
             user = result.user
             Toast.makeText(context, "Login successful!", Toast.LENGTH_SHORT).show()
             // Navigate to homepage only if the login was successful
@@ -77,6 +80,7 @@ fun LoginScreen(navController: NavController, authViewModel: AuthViewModel) {
             }
         },
         onAuthError = { exception ->
+            isSigningIn = false // Set to false on error
             user = null
             Toast.makeText(context, "Authentication failed: ${exception.localizedMessage}", Toast.LENGTH_SHORT).show()
         }
@@ -268,21 +272,29 @@ fun LoginScreen(navController: NavController, authViewModel: AuthViewModel) {
             modifier = Modifier.fillMaxWidth(),
             horizontalArrangement = Arrangement.SpaceEvenly
         ) {
-            Image(
-                painter = painterResource(id = R.drawable.google_logo),
-                contentDescription = "Google Logo",
-                modifier = Modifier
-                    .size(30.dp)
-                    .clickable {
-                        val gso = GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
-                            .requestIdToken(token)
-                            .requestEmail()
-                            .build()
+            if (isSigningIn) {
+                CircularProgressIndicator( // Show progress indicator while signing in with google
+                    color = Color.Red,
+                    modifier = Modifier.size(30.dp)
+                )
+            } else {
+                Image(
+                    painter = painterResource(id = R.drawable.google_logo),
+                    contentDescription = "Google Logo",
+                    modifier = Modifier
+                        .size(30.dp)
+                        .clickable {
+                            isSigningIn = true // Set to true when sign-in starts
+                            val gso = GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
+                                .requestIdToken(token)
+                                .requestEmail()
+                                .build()
 
-                        val googleSignInClient = GoogleSignIn.getClient(context, gso)
-                        launcher.launch(googleSignInClient.signInIntent)
-                    }
-            )
+                            val googleSignInClient = GoogleSignIn.getClient(context, gso)
+                            launcher.launch(googleSignInClient.signInIntent)
+                        }
+                )
+            }
         }
     }
 }
