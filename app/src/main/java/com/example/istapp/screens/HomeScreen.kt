@@ -74,7 +74,10 @@ fun HomeScreen(navController: NavController, authViewModel: AuthViewModel) {
 
         Button(
             onClick = {
-                authViewModel.logout() // Ensure this logs the user out of Firebase
+                authViewModel.logout()
+                navController.navigate(Routes.login) {
+                    popUpTo(Routes.homepage) { inclusive = true } // Clear the backstack/Screens Before
+                }
             },
             colors = buttonColors,
             modifier = Modifier.width(120.dp)

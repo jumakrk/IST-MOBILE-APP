@@ -42,7 +42,7 @@ fun VerificationEmailSentScreen(navController: NavController, authViewModel: Aut
     LaunchedEffect(Unit) {
         while (true) {
             authViewModel.checkEmailVerificationStatus()
-            delay(5000L) // Check every 5 seconds
+            delay(5000L) // Check if users email is verified every 5 seconds
         }
     }
 
