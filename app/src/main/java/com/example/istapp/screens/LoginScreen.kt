@@ -72,8 +72,8 @@ fun LoginScreen(navController: NavController, authViewModel: AuthViewModel) {
         onAuthComplete = { result ->
             isSigningIn = false // Set to false when sign-in completes
             user = result.user
-            Toast.makeText(context, "Login successful!", Toast.LENGTH_SHORT).show()
-            // Navigate to homepage only if the login was successful
+            Toast.makeText(context, "Login successful! Welcome back. You are logged in as ${user?.email}.", Toast.LENGTH_SHORT).show()
+            // Navigate to homepage only if the login with google was successful
             Log.d("LoginScreen", "Navigating to homepage")
             navController.navigate(Routes.homepage) {
                 popUpTo(Routes.login) { inclusive = true }
@@ -245,7 +245,9 @@ fun LoginScreen(navController: NavController, authViewModel: AuthViewModel) {
 
             Text(
                 text = "Sign Up",
-                Modifier.clickable { navController.navigate(Routes.signup) },
+                Modifier.clickable { navController.navigate(Routes.signup){
+                    popUpTo(Routes.login) { inclusive = true } // Clear the back stack(previous screens to prevent going back to them when clicking "Back")
+                } },
                 color = Color.Gray
             )
         }

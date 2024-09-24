@@ -70,7 +70,7 @@ fun SignupScreen(navController: NavController, authViewModel: AuthViewModel) {
         onAuthComplete = { result ->
             isSigningIn = false // Set to false when sign-in completes
             user = result.user
-            Toast.makeText(context, "SignIn with Google successful!", Toast.LENGTH_SHORT).show()
+            Toast.makeText(context, "SignIn with Google successful! Welcome you are signed in as ${user?.email}.", Toast.LENGTH_SHORT).show()
             // Navigate to homepage after successful google sign-up
             navController.navigate(Routes.homepage) {
                 popUpTo(Routes.signup) { inclusive = true }
@@ -235,7 +235,9 @@ fun SignupScreen(navController: NavController, authViewModel: AuthViewModel) {
 
             Text(
                 text = "Log In",
-                Modifier.clickable { navController.navigate(Routes.login) },
+                Modifier.clickable { navController.navigate(Routes.login){
+                    popUpTo(Routes.signup) { inclusive = true } // Clear the back stack(previous screens to prevent going back to them when clicking "Back")
+                } },
                 color = Color.Gray
             )
         }
@@ -251,7 +253,7 @@ fun SignupScreen(navController: NavController, authViewModel: AuthViewModel) {
         Spacer(modifier = Modifier.height(16.dp))
 
         Text(
-            text = "Continue with",
+            text = "Sign In with",
             color = Color.Black,
             fontWeight = FontWeight.Bold
         )
