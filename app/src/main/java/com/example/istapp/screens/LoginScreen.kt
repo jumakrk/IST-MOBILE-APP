@@ -90,7 +90,7 @@ fun LoginScreen(navController: NavController, authViewModel: AuthViewModel) {
 
     LaunchedEffect(authState) {
         if (authState is AuthState.Authenticated) {
-            Toast.makeText(context, "Login successful!", Toast.LENGTH_SHORT).show()
+            Toast.makeText(context, "Login successful!", Toast.LENGTH_SHORT).show() // Display success message for successful login
             // Navigate to homepage on successful authentication
             navController.navigate(Routes.homepage) {
                 popUpTo(Routes.login) { inclusive = true }

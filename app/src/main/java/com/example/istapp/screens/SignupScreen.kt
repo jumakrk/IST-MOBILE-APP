@@ -101,6 +101,7 @@ fun SignupScreen(navController: NavController, authViewModel: AuthViewModel) {
         }
     }
 
+    var confirmPassword by remember { mutableStateOf("") }
     var confirmPasswordIsFocused by remember { mutableStateOf(false) }
 
     var username by remember {mutableStateOf("")}
@@ -240,8 +241,8 @@ fun SignupScreen(navController: NavController, authViewModel: AuthViewModel) {
 
         //Confirm Password field with visibility toggle
         OutlinedTextField(
-            value = passwordText,
-            onValueChange = { passwordText = it.trim() },
+            value = confirmPassword,
+            onValueChange = { confirmPassword = it.trim() },
             label = {
                 Text(
                     text = "Confirm Password",
@@ -276,8 +277,13 @@ fun SignupScreen(navController: NavController, authViewModel: AuthViewModel) {
 
         Button(
             onClick = {
-                authViewModel.signup(email, passwordText, username)
-                navController.navigate(Routes.verificationEmailSent)
+                if(passwordText != confirmPassword){
+                    Toast.makeText(context, "Passwords do not match", Toast.LENGTH_SHORT).show()
+                    return@Button
+                }else {
+                    authViewModel.signup(email, passwordText, username)
+                    navController.navigate(Routes.verificationEmailSent)
+                }
             },
             enabled = authState !is AuthState.Loading,
             colors = buttonColors,
@@ -293,7 +299,7 @@ fun SignupScreen(navController: NavController, authViewModel: AuthViewModel) {
             }
         }
 
-        Spacer(modifier = Modifier.height(16.dp))
+        Spacer(modifier = Modifier.height(10.dp))
 
         Row {
             Text(
@@ -311,7 +317,7 @@ fun SignupScreen(navController: NavController, authViewModel: AuthViewModel) {
             )
         }
 
-        Spacer(modifier = Modifier.height(16.dp))
+        Spacer(modifier = Modifier.height(10.dp))
 
         Text(
             text = "or",
@@ -319,7 +325,7 @@ fun SignupScreen(navController: NavController, authViewModel: AuthViewModel) {
             fontWeight = FontWeight.Bold
         )
 
-        Spacer(modifier = Modifier.height(16.dp))
+        Spacer(modifier = Modifier.height(10.dp))
 
         Text(
             text = "Sign In with",
@@ -327,7 +333,7 @@ fun SignupScreen(navController: NavController, authViewModel: AuthViewModel) {
             fontWeight = FontWeight.Bold
         )
 
-        Spacer(modifier = Modifier.height(20.dp))
+        Spacer(modifier = Modifier.height(10.dp))
 
         Row(
             modifier = Modifier.fillMaxWidth(),
