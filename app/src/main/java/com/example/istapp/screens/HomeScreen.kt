@@ -51,6 +51,13 @@ fun HomeScreen(navController: NavController, authViewModel: AuthViewModel) {
         }
     }
 
+    // Function to get the current user's username (display name) from Firebase Authentication
+    fun getUsername(): String? {
+        val user = FirebaseAuth.getInstance().currentUser
+        return user?.displayName // Returns the username (displayName) or null if not set
+    }
+
+
     Column(
         modifier = Modifier.fillMaxSize(),
         verticalArrangement = Arrangement.Center,
@@ -64,11 +71,25 @@ fun HomeScreen(navController: NavController, authViewModel: AuthViewModel) {
 
         Spacer(modifier = Modifier.height(16.dp))
 
+        val username = getUsername() // Get the current user's username
         Text(
-            text = "Welcome to IST App",
+            text = "Home Page",
             fontSize = 28.sp,
             fontWeight = FontWeight.Bold
         )
+        if (username != null) {
+            Text(
+                text = "Hello $username, Welcome to the Home Page.",
+                fontSize = 18.sp,
+                color = Color.Gray,
+                )
+        } else {
+            Text(
+                text = "Hello Guest, Welcome to the Home Page.",
+                fontSize = 18.sp,
+                color = Color.Gray,
+                )
+        }
 
         Spacer(modifier = Modifier.height(4.dp))
 

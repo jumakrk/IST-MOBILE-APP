@@ -4,6 +4,7 @@ import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.auth.UserProfileChangeRequest
 
 // This AuthViewModel contains the logic for the authentication process
 class AuthViewModel : ViewModel() {
@@ -25,6 +26,7 @@ class AuthViewModel : ViewModel() {
         }
     }
 
+    // Login functionality
     fun login(email: String, password: String) {
         if (email.isEmpty() || password.isEmpty()) {
             _authState.value = AuthState.Error("Email and password cannot be empty")
@@ -51,23 +53,41 @@ class AuthViewModel : ViewModel() {
             }
     }
 
-    fun signup(email: String, password: String) {
-        if (email.isEmpty() || password.isEmpty()) {
-            _authState.value = AuthState.Error("Email and password cannot be empty")
+    // Signup functionality with Username
+    fun signup(email: String, password: String, username: String) {
+        if (email.isEmpty() || password.isEmpty() || username.isEmpty()) {
+            _authState.value = AuthState.Error("Email, password, and username cannot be empty")
             return
         }
 
         _authState.value = AuthState.Loading
 
+        // Create user with email and password
         auth.createUserWithEmailAndPassword(email, password)
             .addOnCompleteListener { task ->
                 if (task.isSuccessful) {
-                    auth.currentUser?.sendEmailVerification()?.addOnCompleteListener { verificationTask ->
-                        if (verificationTask.isSuccessful) {
-                            _authState.value = AuthState.Success("A verification email has been sent. Please verify your email to continue.")
-                        } else {
-                            _authState.value = AuthState.Error("Failed to send verification email: ${verificationTask.exception?.message}")
-                        }
+                    val user = auth.currentUser
+                    user?.let {
+                        // Update user profile with username
+                        val profileUpdates = UserProfileChangeRequest.Builder()
+                            .setDisplayName(username)
+                            .build()
+
+                        it.updateProfile(profileUpdates)
+                            .addOnCompleteListener { profileUpdateTask ->
+                                if (profileUpdateTask.isSuccessful) {
+                                    // Send email verification
+                                    user.sendEmailVerification().addOnCompleteListener { verificationTask ->
+                                        if (verificationTask.isSuccessful) {
+                                            _authState.value = AuthState.Success("A verification email has been sent. Please verify your email to continue.")
+                                        } else {
+                                            _authState.value = AuthState.Error("Failed to send verification email: ${verificationTask.exception?.message}")
+                                        }
+                                    }
+                                } else {
+                                    _authState.value = AuthState.Error("Failed to update profile: ${profileUpdateTask.exception?.message}")
+                                }
+                            }
                     }
                 } else {
                     _authState.value = AuthState.Error(task.exception?.message ?: "Sign up failed. Please try again.")
@@ -78,6 +98,7 @@ class AuthViewModel : ViewModel() {
             }
     }
 
+    // Logout functionality
     fun logout() {
         auth.signOut()
         _authState.value = AuthState.UnAuthenticated
@@ -126,8 +147,7 @@ class AuthViewModel : ViewModel() {
         }
     }
 
-    // AuthViewModel.kt
-
+    // Check email verification status
     fun checkEmailVerificationStatus() {
         val currentUser = auth.currentUser
         if (currentUser != null) {

@@ -72,7 +72,7 @@ fun LoginScreen(navController: NavController, authViewModel: AuthViewModel) {
         onAuthComplete = { result ->
             isSigningIn = false // Set to false when sign-in completes
             user = result.user
-            Toast.makeText(context, "Login successful! Welcome back. You are logged in as ${user?.email}.", Toast.LENGTH_SHORT).show()
+            Toast.makeText(context, "Welcome back! You are logged in with google as ${user?.email}.", Toast.LENGTH_SHORT).show()
             // Navigate to homepage only if the login with google was successful
             Log.d("LoginScreen", "Navigating to homepage")
             navController.navigate(Routes.homepage) {

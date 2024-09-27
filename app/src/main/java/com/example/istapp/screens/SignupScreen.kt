@@ -70,7 +70,7 @@ fun SignupScreen(navController: NavController, authViewModel: AuthViewModel) {
         onAuthComplete = { result ->
             isSigningIn = false // Set to false when sign-in completes
             user = result.user
-            Toast.makeText(context, "SignIn with Google successful! Welcome you are signed in as ${user?.email}.", Toast.LENGTH_SHORT).show()
+            Toast.makeText(context, "Welcome! You are signed in with Google as ${user?.email}.", Toast.LENGTH_SHORT).show()
             // Navigate to homepage after successful google sign-up
             navController.navigate(Routes.homepage) {
                 popUpTo(Routes.signup) { inclusive = true }
@@ -100,6 +100,11 @@ fun SignupScreen(navController: NavController, authViewModel: AuthViewModel) {
             ).show()
         }
     }
+
+    var confirmPasswordIsFocused by remember { mutableStateOf(false) }
+
+    var username by remember {mutableStateOf("")}
+    var usernameIsFocused by remember { mutableStateOf(false) }
 
     var email by remember { mutableStateOf("") }
     var emailIsFocused by remember { mutableStateOf(false) }
@@ -143,6 +148,33 @@ fun SignupScreen(navController: NavController, authViewModel: AuthViewModel) {
 
         Spacer(modifier = Modifier.height(16.dp))
 
+        // Username input field
+        OutlinedTextField(
+            value = username,
+            onValueChange = { username = it },
+            label = {
+                Text(
+                    text = "Username",
+                    color = if (usernameIsFocused) Color.Red else Color.Gray
+                )
+            },
+            colors = OutlinedTextFieldDefaults.colors(
+                focusedBorderColor = Color.Red,
+                unfocusedBorderColor = Color.Gray,
+                focusedLabelColor = Color.Red,
+                unfocusedLabelColor = Color.Gray,
+                cursorColor = Color.Red
+            ),
+            modifier = Modifier
+                .width(300.dp)
+                .focusRequester(focusRequester)
+                .onFocusChanged { focusState -> usernameIsFocused = focusState.isFocused }
+                .onKeyEvent { handleKeyEvent(it) }
+        )
+
+        Spacer(modifier = Modifier.height(16.dp))
+
+        // Email input field
         OutlinedTextField(
             value = email,
             onValueChange = { email = it.trim() },
@@ -170,6 +202,7 @@ fun SignupScreen(navController: NavController, authViewModel: AuthViewModel) {
 
         val icon = if (passwordVisible) R.drawable.hide_icon else R.drawable.show_icon
 
+        // Password field with visibility toggle
         OutlinedTextField(
             value = passwordText,
             onValueChange = { passwordText = it.trim() },
@@ -205,9 +238,45 @@ fun SignupScreen(navController: NavController, authViewModel: AuthViewModel) {
 
         Spacer(modifier = Modifier.height(16.dp))
 
+        //Confirm Password field with visibility toggle
+        OutlinedTextField(
+            value = passwordText,
+            onValueChange = { passwordText = it.trim() },
+            label = {
+                Text(
+                    text = "Confirm Password",
+                    color = if (confirmPasswordIsFocused) Color.Red else Color.Gray
+                )
+            },
+            colors = OutlinedTextFieldDefaults.colors(
+                focusedBorderColor = Color.Red,
+                unfocusedBorderColor = Color.Gray,
+                focusedLabelColor = Color.Red,
+                unfocusedLabelColor = Color.Gray,
+                cursorColor = Color.Red
+            ),
+            modifier = Modifier
+                .width(300.dp)
+                .focusRequester(focusRequester)
+                .onFocusChanged { focusState -> confirmPasswordIsFocused = focusState.isFocused }
+                .onKeyEvent { handleKeyEvent(it) },
+            visualTransformation = if (passwordVisible) VisualTransformation.None else PasswordVisualTransformation(),
+            trailingIcon = {
+                Icon(
+                    painter = painterResource(id = icon),
+                    contentDescription = if (passwordVisible) "Hide Password" else "Show Password",
+                    modifier = Modifier
+                        .size(16.dp)
+                        .clickable { passwordVisible = !passwordVisible }
+                )
+            }
+        )
+
+        Spacer(modifier = Modifier.height(16.dp))
+
         Button(
             onClick = {
-                authViewModel.signup(email, passwordText)
+                authViewModel.signup(email, passwordText, username)
                 navController.navigate(Routes.verificationEmailSent)
             },
             enabled = authState !is AuthState.Loading,
@@ -277,7 +346,8 @@ fun SignupScreen(navController: NavController, authViewModel: AuthViewModel) {
                         .size(30.dp)
                         .clickable {
                             isSigningIn = true // Set to true when sign-in starts
-                            val gso = GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
+                            val gso = GoogleSignInOptions
+                                .Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
                                 .requestIdToken(token)
                                 .requestEmail()
                                 .build()
