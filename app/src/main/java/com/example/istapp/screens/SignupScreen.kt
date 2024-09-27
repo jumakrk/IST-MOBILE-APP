@@ -104,8 +104,11 @@ fun SignupScreen(navController: NavController, authViewModel: AuthViewModel) {
     var confirmPassword by remember { mutableStateOf("") }
     var confirmPasswordIsFocused by remember { mutableStateOf(false) }
 
-    var username by remember {mutableStateOf("")}
-    var usernameIsFocused by remember { mutableStateOf(false) }
+    var firstname by remember { mutableStateOf("") }
+    var firstnameIsFocused by remember { mutableStateOf(false) }
+
+    var lastname by remember { mutableStateOf("") }
+    var lastnameIsFocused by remember { mutableStateOf(false) }
 
     var email by remember { mutableStateOf("") }
     var emailIsFocused by remember { mutableStateOf(false) }
@@ -131,7 +134,7 @@ fun SignupScreen(navController: NavController, authViewModel: AuthViewModel) {
             modifier = Modifier.size(150.dp)
         )
 
-        Spacer(modifier = Modifier.height(16.dp))
+        Spacer(modifier = Modifier.height(2.dp))
 
         Text(
             text = "Create an Account",
@@ -149,14 +152,14 @@ fun SignupScreen(navController: NavController, authViewModel: AuthViewModel) {
 
         Spacer(modifier = Modifier.height(16.dp))
 
-        // Username input field
+        // First name input field
         OutlinedTextField(
-            value = username,
-            onValueChange = { username = it },
+            value = firstname,
+            onValueChange = { firstname = it.trim() },
             label = {
                 Text(
-                    text = "Username",
-                    color = if (usernameIsFocused) Color.Red else Color.Gray
+                    text = "First Name",
+                    color = if (firstnameIsFocused) Color.Red else Color.Gray
                 )
             },
             colors = OutlinedTextFieldDefaults.colors(
@@ -169,7 +172,33 @@ fun SignupScreen(navController: NavController, authViewModel: AuthViewModel) {
             modifier = Modifier
                 .width(300.dp)
                 .focusRequester(focusRequester)
-                .onFocusChanged { focusState -> usernameIsFocused = focusState.isFocused }
+                .onFocusChanged { focusState -> firstnameIsFocused = focusState.isFocused }
+                .onKeyEvent { handleKeyEvent(it) }
+        )
+
+        Spacer(modifier = Modifier.height(16.dp))
+
+        // Last name input field
+        OutlinedTextField(
+            value = lastname,
+            onValueChange = { lastname = it.trim() },
+            label = {
+                Text(
+                    text = "Last Name",
+                    color = if (lastnameIsFocused) Color.Red else Color.Gray
+                )
+            },
+            colors = OutlinedTextFieldDefaults.colors(
+                focusedBorderColor = Color.Red,
+                unfocusedBorderColor = Color.Gray,
+                focusedLabelColor = Color.Red,
+                unfocusedLabelColor = Color.Gray,
+                cursorColor = Color.Red
+            ),
+            modifier = Modifier
+                .width(300.dp)
+                .focusRequester(focusRequester)
+                .onFocusChanged { focusState -> lastnameIsFocused = focusState.isFocused }
                 .onKeyEvent { handleKeyEvent(it) }
         )
 
@@ -239,49 +268,13 @@ fun SignupScreen(navController: NavController, authViewModel: AuthViewModel) {
 
         Spacer(modifier = Modifier.height(16.dp))
 
-        //Confirm Password field with visibility toggle
-        OutlinedTextField(
-            value = confirmPassword,
-            onValueChange = { confirmPassword = it.trim() },
-            label = {
-                Text(
-                    text = "Confirm Password",
-                    color = if (confirmPasswordIsFocused) Color.Red else Color.Gray
-                )
-            },
-            colors = OutlinedTextFieldDefaults.colors(
-                focusedBorderColor = Color.Red,
-                unfocusedBorderColor = Color.Gray,
-                focusedLabelColor = Color.Red,
-                unfocusedLabelColor = Color.Gray,
-                cursorColor = Color.Red
-            ),
-            modifier = Modifier
-                .width(300.dp)
-                .focusRequester(focusRequester)
-                .onFocusChanged { focusState -> confirmPasswordIsFocused = focusState.isFocused }
-                .onKeyEvent { handleKeyEvent(it) },
-            visualTransformation = if (passwordVisible) VisualTransformation.None else PasswordVisualTransformation(),
-            trailingIcon = {
-                Icon(
-                    painter = painterResource(id = icon),
-                    contentDescription = if (passwordVisible) "Hide Password" else "Show Password",
-                    modifier = Modifier
-                        .size(16.dp)
-                        .clickable { passwordVisible = !passwordVisible }
-                )
-            }
-        )
-
-        Spacer(modifier = Modifier.height(16.dp))
-
         Button(
             onClick = {
                 if(passwordText != confirmPassword){
                     Toast.makeText(context, "Passwords do not match", Toast.LENGTH_SHORT).show()
                     return@Button
                 }else {
-                    authViewModel.signup(email, passwordText, username)
+                    authViewModel.signup(email, passwordText, firstname, lastname)
                     navController.navigate(Routes.verificationEmailSent)
                 }
             },

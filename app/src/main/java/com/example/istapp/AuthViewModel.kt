@@ -54,8 +54,8 @@ class AuthViewModel : ViewModel() {
     }
 
     // Signup functionality with Username
-    fun signup(email: String, password: String, username: String) {
-        if (email.isEmpty() || password.isEmpty() || username.isEmpty()) {
+    fun signup(email: String, password: String, firstname: String, lastname: String) {
+        if (email.isEmpty() || password.isEmpty() || firstname.isEmpty() || lastname.isEmpty()) {
             _authState.value = AuthState.Error("Email, password, and username cannot be empty")
             return
         }
@@ -70,7 +70,7 @@ class AuthViewModel : ViewModel() {
                     user?.let {
                         // Update user profile with username
                         val profileUpdates = UserProfileChangeRequest.Builder()
-                            .setDisplayName(username)
+                            .setDisplayName("$firstname $lastname") //converted concatenation to template
                             .build()
 
                         it.updateProfile(profileUpdates)
