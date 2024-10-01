@@ -101,9 +101,6 @@ fun SignupScreen(navController: NavController, authViewModel: AuthViewModel) {
         }
     }
 
-    var confirmPassword by remember { mutableStateOf("") }
-    var confirmPasswordIsFocused by remember { mutableStateOf(false) }
-
     var firstname by remember { mutableStateOf("") }
     var firstnameIsFocused by remember { mutableStateOf(false) }
 
@@ -270,14 +267,10 @@ fun SignupScreen(navController: NavController, authViewModel: AuthViewModel) {
 
         Button(
             onClick = {
-                if(passwordText != confirmPassword){
-                    Toast.makeText(context, "Passwords do not match", Toast.LENGTH_SHORT).show()
-                    return@Button
-                }else {
-                    authViewModel.signup(email, passwordText, firstname, lastname)
-                    navController.navigate(Routes.verificationEmailSent)
-                }
+                authViewModel.signup(email, passwordText, firstname, lastname)
+                navController.navigate(Routes.verificationEmailSent)
             },
+
             enabled = authState !is AuthState.Loading,
             colors = buttonColors,
             modifier = Modifier.width(120.dp)

@@ -1,109 +1,99 @@
 package com.example.istapp.screens
 
-import androidx.compose.foundation.Image
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.height
+import android.annotation.SuppressLint
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.width
-import androidx.compose.material3.Button
-import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.rounded.AccountCircle
+import androidx.compose.material.icons.rounded.AddCircle
+import androidx.compose.material.icons.rounded.Menu
+import androidx.compose.material.icons.rounded.Notifications
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
+import androidx.compose.material3.TopAppBar
+import androidx.compose.material3.TopAppBarDefaults
+import androidx.compose.material3.TopAppBarScrollBehavior
+import androidx.compose.material3.rememberTopAppBarState
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.navigation.NavController
+import androidx.navigation.NavHostController
 import com.example.istapp.AuthViewModel
 import com.example.istapp.R
-import com.example.istapp.nav.Routes
-import com.google.firebase.auth.FirebaseAuth
 
+
+@OptIn(ExperimentalMaterial3Api::class)
+@SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
+@Composable
+fun HomeScreen(authViewModel: NavHostController, navController: AuthViewModel) {
+
+    // TopAppBar scroll behavior for hiding/showing title when scrolling
+    val scrollBehavior = TopAppBarDefaults.enterAlwaysScrollBehavior( state = rememberTopAppBarState())
+
+    Scaffold(
+        topBar = {
+            TopBar(scrollBehavior = scrollBehavior)
+        },
+    ) {
+        paddingValues -> HomeScreenContent(Modifier.padding(paddingValues))
+    }
+}
 
 @Composable
-fun HomeScreen(navController: NavController, authViewModel: AuthViewModel) {
+fun HomeScreenContent(modifier: Modifier = Modifier) {}
 
-    val buttonColors = ButtonDefaults.buttonColors(
-        containerColor = Color.Red,
-        contentColor = Color.White
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun TopBar(modifier: Modifier = Modifier, scrollBehavior: TopAppBarScrollBehavior) {
+    TopAppBar(
+        modifier = modifier,
+        scrollBehavior = scrollBehavior,
+        colors = TopAppBarDefaults.topAppBarColors(
+            containerColor = Color.Red,
+            titleContentColor = Color.LightGray,
+            navigationIconContentColor = Color.LightGray,
+            actionIconContentColor = Color.LightGray,
+        ),
+        title = {
+            Text(
+                text = "IST Alumni App",
+                fontSize = 16.sp,
+                fontWeight = FontWeight.Bold
+            )
+        },
+        navigationIcon = {
+            Icon(
+                imageVector = Icons.Rounded.Menu,
+                contentDescription = "Menu Icon",
+                modifier = Modifier
+                    .padding(start= 16.dp, end = 8.dp )
+                    .size(27.dp)
+            )
+        },
+        actions = {
+            Icon(
+                imageVector = Icons.Rounded.Notifications,
+                contentDescription = "Menu Icon",
+                modifier = Modifier
+                    .padding(end = 8.dp )
+                    .size(24.dp)
+            )
+
+            Icon(
+                imageVector = Icons.Rounded.AccountCircle,
+                contentDescription = "Menu Icon",
+                modifier = Modifier
+                    .padding(start= 8.dp, end = 16.dp )
+                    .size(30.dp),
+            )
+        },
     )
-
-    val currentUser = FirebaseAuth.getInstance().currentUser // Get the current user
-
-    LaunchedEffect(currentUser) {
-        // If the user is not signed in, navigate to the login screen
-        if (currentUser == null) {
-            navController.navigate(Routes.login) {
-                popUpTo(Routes.homepage) { inclusive = true } // Clear the backstack
-            }
-        } else if (!currentUser.isEmailVerified) {
-            // If email is not verified, navigate to an email verification page
-            navController.navigate(Routes.verificationEmailSent) {
-                popUpTo(Routes.homepage) { inclusive = true } // Clear the backstack
-            }
-        }
-    }
-
-    // Function to get the current user's username (display name) from Firebase Authentication
-    fun getUsername(): String? {
-        val user = FirebaseAuth.getInstance().currentUser
-        return user?.displayName // Returns the username (displayName) or null if not set
-    }
-
-
-    Column(
-        modifier = Modifier.fillMaxSize(),
-        verticalArrangement = Arrangement.Center,
-        horizontalAlignment = Alignment.CenterHorizontally
-    ) {
-        Image(
-            painter = painterResource(id = R.drawable.ist_logo),
-            contentDescription = "IST Logo",
-            modifier = Modifier.size(150.dp)
-        )
-
-        Spacer(modifier = Modifier.height(16.dp))
-
-        val username = getUsername() // Get the current user's username
-        Text(
-            text = "Home Page",
-            fontSize = 28.sp,
-            fontWeight = FontWeight.Bold
-        )
-        if (username != null) {
-            Text(
-                text = "Hello $username, Welcome to the Home Page.",
-                fontSize = 18.sp,
-                color = Color.Gray,
-                )
-        } else {
-            Text(
-                text = "Hello Guest, Welcome to the Home Page.",
-                fontSize = 18.sp,
-                color = Color.Gray,
-                )
-        }
-
-        Spacer(modifier = Modifier.height(4.dp))
-
-        Button(
-            onClick = {
-                authViewModel.logout()
-                navController.navigate(Routes.login) {
-                    popUpTo(Routes.homepage) { inclusive = true } // Clear the backstack/Screens Before
-                }
-            },
-            colors = buttonColors,
-            modifier = Modifier.width(120.dp)
-        ) {
-            Text(text = "Log Out")
-        }
-    }
 }
