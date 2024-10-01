@@ -9,48 +9,79 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.material3.rememberTopAppBarState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavHostController
 import com.example.istapp.AuthViewModel
-
+import com.example.istapp.nav.Routes
+import com.google.firebase.auth.FirebaseAuth
 
 @OptIn(ExperimentalMaterial3Api::class)
 @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
 @Composable
-fun HomeScreen(authViewModel: NavHostController, navController: AuthViewModel) {
+fun HomeScreen(navController: NavHostController, authViewModel: AuthViewModel) {
 
     // TopAppBar scroll behavior for hiding/showing title when scrolling
-    val scrollBehavior = TopAppBarDefaults.enterAlwaysScrollBehavior( state = rememberTopAppBarState())
+    val scrollBehavior = TopAppBarDefaults.enterAlwaysScrollBehavior(state = rememberTopAppBarState())
+
+    val currentUser = FirebaseAuth.getInstance().currentUser // Get the current user
+
+    LaunchedEffect(currentUser) {
+        // If the user is not signed in, navigate to the login screen
+        if (currentUser == null) {
+            navController.navigate(Routes.login) {
+                popUpTo(Routes.homepage) { inclusive = true } // Clear the backstack
+            }
+        } else if (!currentUser.isEmailVerified) {
+            // If email is not verified, navigate to an email verification page
+            navController.navigate(Routes.verificationEmailSent) {
+                popUpTo(Routes.homepage) { inclusive = true } // Clear the backstack
+            }
+        }
+    }
 
     Scaffold(
         topBar = {
             TopBar(scrollBehavior = scrollBehavior)
         },
-    ) {
-        paddingValues -> HomeScreenContent(paddingValues = paddingValues)
+    ) { paddingValues ->
+        HomeScreenContent(paddingValues = paddingValues, navController = navController, authViewModel = authViewModel)
     }
 }
 
 @Composable
-fun HomeScreenContent(paddingValues: PaddingValues) {
+fun HomeScreenContent(
+    paddingValues: PaddingValues,
+    navController: NavHostController,
+    authViewModel: AuthViewModel
+) {
+
+    val buttonColors = ButtonDefaults.buttonColors(
+        containerColor = Color.Red,
+        contentColor = Color.White
+    )
+
     LazyColumn(
         modifier = Modifier.fillMaxSize(),
-        horizontalAlignment = androidx.compose.ui.Alignment.CenterHorizontally,
         contentPadding = PaddingValues(
             top = paddingValues.calculateTopPadding() + 16.dp,
         )
     ) {
-        items(10){
+        items(10) {
             Box(
                 modifier = Modifier
                     .padding(horizontal = 16.dp)
@@ -60,6 +91,22 @@ fun HomeScreenContent(paddingValues: PaddingValues) {
                     .background(Color.LightGray)
             )
             Spacer(modifier = Modifier.height(16.dp))
+        }
+        //Not Needed Here
+        item {
+            // Logout Button
+            Button(
+                onClick = {
+                    authViewModel.logout() // Log the user out of Firebase
+                    navController.navigate(Routes.login) {
+                        popUpTo(Routes.homepage) { inclusive = true } // Clear the backstack
+                    }
+                },
+                colors = buttonColors,
+                modifier = Modifier.width(120.dp)
+            ) {
+                Text(text = "Log Out")
+            }
         }
     }
 }
