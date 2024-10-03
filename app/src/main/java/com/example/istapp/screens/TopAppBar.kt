@@ -1,5 +1,6 @@
 package com.example.istapp.screens
 
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.material.icons.Icons
@@ -21,7 +22,7 @@ import androidx.compose.ui.unit.sp
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun TopBar(modifier: Modifier = Modifier, scrollBehavior: TopAppBarScrollBehavior) {
+fun TopBar(modifier: Modifier = Modifier, scrollBehavior: TopAppBarScrollBehavior, onOpenDrawer: () -> Unit) {
     // TopAppBar with title, navigation icon, and action icons
     TopAppBar(
         modifier = modifier,
@@ -46,6 +47,7 @@ fun TopBar(modifier: Modifier = Modifier, scrollBehavior: TopAppBarScrollBehavio
                 modifier = Modifier
                     .padding(start = 16.dp, end = 8.dp)
                     .size(27.dp)
+                    .clickable { onOpenDrawer() },
             )
         },
         actions = {
