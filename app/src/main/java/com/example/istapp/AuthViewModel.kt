@@ -1,8 +1,10 @@
 package com.example.istapp
 
+import android.content.Context
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
+import com.example.istapp.utilities.PreferencesManager
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.UserProfileChangeRequest
 
@@ -99,8 +101,13 @@ class AuthViewModel : ViewModel() {
     }
 
     // Logout functionality
-    fun logout() {
+    fun logout(context: Context) {
         auth.signOut()
+
+        // Reset the flag in PreferencesManager
+        val preferencesManager = PreferencesManager(context)
+        preferencesManager.setLoginMessageShown(false) // Reset the flag
+
         _authState.value = AuthState.UnAuthenticated
     }
 

@@ -12,14 +12,11 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.Button
-import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.DrawerValue
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ModalDrawerSheet
 import androidx.compose.material3.ModalNavigationDrawer
 import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.material3.rememberDrawerState
 import androidx.compose.material3.rememberTopAppBarState
@@ -52,7 +49,7 @@ fun HomeScreen(navController: NavHostController, authViewModel: AuthViewModel) {
         drawerState = drawerState,
         drawerContent = {
             ModalDrawerSheet(modifier = Modifier.width(250.dp)) { // Set the width of the drawer
-                DrawerContent(modifier = Modifier)
+                DrawerContent(modifier = Modifier , navController = navController, authViewModel = authViewModel)
             }
         }
     ) {
@@ -66,8 +63,6 @@ fun HomeScreen(navController: NavHostController, authViewModel: AuthViewModel) {
             content = { paddingValues ->
                 HomeScreenContent(
                     paddingValues = paddingValues,
-                    navController = navController,
-                    authViewModel = authViewModel
                 )
             }
         )
@@ -93,14 +88,13 @@ fun HomeScreen(navController: NavHostController, authViewModel: AuthViewModel) {
 @Composable
 fun HomeScreenContent(
     paddingValues: PaddingValues,
-    navController: NavHostController,
-    authViewModel: AuthViewModel
 ) {
 
-    val buttonColors = ButtonDefaults.buttonColors(
-        containerColor = Color.Red,
-        contentColor = Color.White
-    )
+// Variable to set the button colors
+//    val buttonColors = ButtonDefaults.buttonColors(
+//        containerColor = Color.Red,
+//        contentColor = Color.White
+//    )
 
     LazyColumn(
         modifier = Modifier.fillMaxSize(),
@@ -118,22 +112,6 @@ fun HomeScreenContent(
                     .background(Color.LightGray)
             )
             Spacer(modifier = Modifier.height(16.dp))
-        }
-        //Not Needed Here
-        item {
-            // Logout Button
-            Button(
-                onClick = {
-                    authViewModel.logout() // Log the user out of Firebase
-                    navController.navigate(Routes.login) {
-                        popUpTo(Routes.homepage) { inclusive = true } // Clear the backstack
-                    }
-                },
-                colors = buttonColors,
-                modifier = Modifier.width(120.dp)
-            ) {
-                Text(text = "Log Out")
-            }
         }
     }
 }

@@ -1,11 +1,9 @@
 package com.example.istapp.screens
 
 import androidx.compose.foundation.Image
-import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.*
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.rounded.Delete
 import androidx.compose.material.icons.rounded.Info
 import androidx.compose.material.icons.rounded.Lock
 import androidx.compose.material.icons.rounded.Person
@@ -14,88 +12,127 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.NavigationDrawerItem
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.navigation.NavHostController
+import com.example.istapp.AuthViewModel
 import com.example.istapp.R
+import com.example.istapp.nav.Routes
+import com.google.firebase.auth.FirebaseAuth
 
 // Drawer content
 @Composable
-fun DrawerContent(modifier: Modifier = Modifier) {
-    Image(
-        painter = painterResource(R.drawable.ist_logo),
-        contentDescription = "IST Logo",
-        modifier = modifier
-            .size(100.dp)
-    )
+fun DrawerContent(
+    modifier: Modifier = Modifier,
+    navController: NavHostController,
+    authViewModel: AuthViewModel
+) {
 
-    Spacer(modifier = Modifier.height(16.dp))
+    // Function to get the current user's username (display name) from Firebase Authentication
+    fun getUsername(): String? {
+        val user = FirebaseAuth.getInstance().currentUser
+        return user?.displayName // Returns the username (displayName) or null if not set
+    }
 
-    Text(
-        text = "IST Alumni",
-        fontSize = 24.sp,
-        fontWeight = FontWeight.Bold,
-        modifier = modifier.padding(16.dp)
+    val username = getUsername() // Get the current user's username
+
+    Column(
+        modifier = modifier.fillMaxWidth()
+    ) {
+        // Center the logo
+        Image(
+            painter = painterResource(R.drawable.ist_logo),
+            contentDescription = "IST Logo",
+            modifier = Modifier
+                .size(100.dp)
+                .fillMaxWidth()
+                .align(Alignment.CenterHorizontally)
         )
 
-    HorizontalDivider()
+        Spacer(modifier = Modifier.height(16.dp))
 
-    Spacer(modifier = Modifier.height(4.dp))
+        // IST Alumni text
+        Text(
+            text = "Hello, $username",
+            fontSize = 24.sp,
+            fontWeight = FontWeight.Bold,
+            modifier = Modifier.padding(16.dp)
+        )
 
-    NavigationDrawerItem(
-        icon = {
-            Icon(
-                imageVector = Icons.Rounded.Person,
-                contentDescription = "Users",
-                modifier = modifier.size(27.dp)
-            )
-        },
-        label = {
-            Text(
-            text = "Users",
-            fontSize = 17.sp
-        )},
-        selected = false,
-        onClick = {}
-    )
+        HorizontalDivider()
 
-    Spacer(modifier = Modifier.height(4.dp))
+        Spacer(modifier = Modifier.height(4.dp))
 
-    NavigationDrawerItem(
-        icon = {
-            Icon(
-                imageVector = Icons.Rounded.Info,
-                contentDescription = "Roles",
-                modifier = modifier.size(27.dp)
-            )
-        },
-        label = {
-            Text(
-                text = "Roles",
-                fontSize = 17.sp
-            )},
-        selected = false,
-        onClick = {}
-    )
+        // Navigation items
+        NavigationDrawerItem(
+            icon = {
+                Icon(
+                    imageVector = Icons.Rounded.Person,
+                    contentDescription = "Users",
+                    modifier = Modifier.size(27.dp)
+                )
+            },
+            label = { Text(text = "Users", fontSize = 17.sp) },
+            selected = false,
+            onClick = {}
+        )
 
-    Spacer(modifier = Modifier.height(4.dp))
+        Spacer(modifier = Modifier.height(4.dp))
 
-    NavigationDrawerItem(
-        icon = {
-            Icon(
-                imageVector = Icons.Rounded.Lock,
-                contentDescription = "Permissions",
-                modifier = modifier.size(27.dp)
-            )
-        },
-        label = {
-            Text(
-                text = "Permissions",
-                fontSize = 17.sp
-            )},
-        selected = false,
-        onClick = {}
-    )
+        NavigationDrawerItem(
+            icon = {
+                Icon(
+                    imageVector = Icons.Rounded.Info,
+                    contentDescription = "Roles",
+                    modifier = Modifier.size(27.dp)
+                )
+            },
+            label = { Text(text = "Roles", fontSize = 17.sp) },
+            selected = false,
+            onClick = {}
+        )
+
+        Spacer(modifier = Modifier.height(4.dp))
+
+        NavigationDrawerItem(
+            icon = {
+                Icon(
+                    imageVector = Icons.Rounded.Lock,
+                    contentDescription = "Permissions",
+                    modifier = Modifier.size(27.dp)
+                )
+            },
+            label = { Text(text = "Permissions", fontSize = 17.sp) },
+            selected = false,
+            onClick = {}
+        )
+
+        // Spacer to push the logout button to the bottom
+        Spacer(modifier = Modifier.weight(1f))
+
+        // Logout button at the bottom
+        HorizontalDivider()
+
+        NavigationDrawerItem(
+            icon = {
+                Icon(
+                    imageVector = Icons.Rounded.Delete,
+                    contentDescription = "Logout",
+                    modifier = Modifier.size(27.dp)
+                )
+            },
+            label = { Text(text = "Logout", fontSize = 17.sp) },
+            selected = false,
+            onClick = {
+                authViewModel.logout(context = navController.context) // Log the user out of Firebase
+                navController.navigate(Routes.login) {
+                    popUpTo(Routes.homepage) { inclusive = true } // Clear the backstack
+                }
+            }
+        )
+    }
 }

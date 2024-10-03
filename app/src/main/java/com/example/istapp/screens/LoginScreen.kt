@@ -42,6 +42,7 @@ import com.example.istapp.AuthState
 import com.example.istapp.AuthViewModel
 import com.example.istapp.R
 import com.example.istapp.nav.Routes
+import com.example.istapp.utilities.PreferencesManager
 import com.google.android.gms.auth.api.signin.GoogleSignIn
 import com.google.android.gms.auth.api.signin.GoogleSignInOptions
 import com.google.android.gms.common.api.ApiException
@@ -90,7 +91,14 @@ fun LoginScreen(navController: NavController, authViewModel: AuthViewModel) {
 
     LaunchedEffect(authState) {
         if (authState is AuthState.Authenticated) {
-            Toast.makeText(context, "Login successful!", Toast.LENGTH_SHORT).show() // Display success message for successful login
+            val preferencesManager = PreferencesManager(context)
+            if (!preferencesManager.isLoginMessageShown()) {
+                // Display success message for successful login
+                Toast.makeText(context, "Login successful!", Toast.LENGTH_SHORT).show()
+
+                // Set the flag to true
+                preferencesManager.setLoginMessageShown(true)
+            }
             // Navigate to homepage on successful authentication
             navController.navigate(Routes.homepage) {
                 popUpTo(Routes.login) { inclusive = true }
