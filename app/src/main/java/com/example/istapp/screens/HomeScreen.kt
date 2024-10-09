@@ -56,6 +56,7 @@ fun HomeScreen(navController: NavHostController, authViewModel: AuthViewModel) {
         Scaffold(
             topBar = {
                 TopBar(
+                    navController = navController,
                     scrollBehavior = scrollBehavior,
                     onOpenDrawer = { scope.launch { drawerState.open() } } // Open drawer on icon click
                 )

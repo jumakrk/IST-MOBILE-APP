@@ -19,10 +19,12 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.navigation.NavHostController
+import com.example.istapp.nav.Routes
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun TopBar(modifier: Modifier = Modifier, scrollBehavior: TopAppBarScrollBehavior, onOpenDrawer: () -> Unit) {
+fun TopBar(navController: NavHostController, modifier: Modifier = Modifier, scrollBehavior: TopAppBarScrollBehavior, onOpenDrawer: () -> Unit) {
     // TopAppBar with title, navigation icon, and action icons
     TopAppBar(
         modifier = modifier,
@@ -63,6 +65,7 @@ fun TopBar(modifier: Modifier = Modifier, scrollBehavior: TopAppBarScrollBehavio
                 imageVector = Icons.Rounded.AccountCircle,
                 contentDescription = "Menu Icon",
                 modifier = Modifier
+                    .clickable{navController.navigate(Routes.profile)}
                     .padding(start = 8.dp, end = 16.dp)
                     .size(30.dp),
             )

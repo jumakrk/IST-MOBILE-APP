@@ -7,4 +7,5 @@ object Routes {
     var forgotPassword = "forgotPassword"
     var homepage = "home"
     var verificationEmailSent = "verificationEmailSent"
+    var profile = "profile"
 }
