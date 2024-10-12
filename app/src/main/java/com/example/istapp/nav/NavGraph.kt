@@ -9,7 +9,6 @@ import com.example.istapp.AuthViewModel
 import com.example.istapp.screens.ForgotPasswordScreen
 import com.example.istapp.screens.HomeScreen
 import com.example.istapp.screens.LoginScreen
-import com.example.istapp.screens.ProfileScreen
 import com.example.istapp.screens.SignupScreen
 import com.example.istapp.screens.VerificationEmailSentScreen
 
@@ -31,9 +30,6 @@ fun NavGraph(authViewModel: AuthViewModel){
         })
         composable(Routes.verificationEmailSent, content = {
             VerificationEmailSentScreen(navController, authViewModel)
-        })
-        composable(Routes.profile, content = {
-            ProfileScreen()
         })
     })
 }
