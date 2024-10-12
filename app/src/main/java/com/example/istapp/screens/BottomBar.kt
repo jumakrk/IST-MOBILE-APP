@@ -19,6 +19,7 @@ import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavHostController
@@ -35,7 +36,9 @@ fun BottomBar(navController: NavHostController) {
         modifier = Modifier
             .height(85.dp)
     ) {
-        NavigationBar {
+        NavigationBar (
+            containerColor = Color.Red,
+        ) {
             bottomNavItems.forEachIndexed { index, bottomNavItem ->
                 NavigationBarItem(
                     selected = index == selected,
@@ -65,13 +68,12 @@ fun BottomBar(navController: NavHostController) {
                                     bottomNavItem.selectedIcon
                                 else
                                     bottomNavItem.unselectedIcon,
-                                contentDescription = bottomNavItem.label
+                                contentDescription = bottomNavItem.label,
+                                tint = Color.LightGray
                             )
                         }
                     },
-                    label = {
-                        Text(text = bottomNavItem.label)
-                    }
+                    label = { Text(text = bottomNavItem.label) }
                 )
             }
         }
@@ -92,7 +94,7 @@ val bottomNavItems = listOf(
 
     BottomNavItem(
         label = "Jobs",
-        route = Routes.homepage, //TODO: Change to jobs screen
+        route = Routes.login, //TODO: Change to jobs screen
         icon = Icons.Rounded.BusinessCenter,
         selectedIcon = Icons.Filled.BusinessCenter,
         unselectedIcon = Icons.Rounded.BusinessCenter,

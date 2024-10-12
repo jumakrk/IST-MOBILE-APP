@@ -1,6 +1,7 @@
 package com.example.istapp
 
 import android.content.Context
+import android.widget.Toast
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
@@ -109,6 +110,9 @@ class AuthViewModel : ViewModel() {
         preferencesManager.setLoginMessageShown(false) // Reset the flag
 
         _authState.value = AuthState.UnAuthenticated
+
+        // Show a toast message indicating successful logout
+        Toast.makeText(context, "Successfully logged out", Toast.LENGTH_SHORT).show()
     }
 
     fun resetPassword(email: String) {
