@@ -12,9 +12,13 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.rounded.Add
 import androidx.compose.material3.DrawerValue
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FloatingActionButton
+import androidx.compose.material3.FloatingActionButtonDefaults
+import androidx.compose.material3.Icon
 import androidx.compose.material3.ModalDrawerSheet
 import androidx.compose.material3.ModalNavigationDrawer
 import androidx.compose.material3.Scaffold
@@ -68,7 +72,18 @@ fun HomeScreen(navController: NavHostController, authViewModel: AuthViewModel) {
             },
 
             floatingActionButton = {
-                FloatingActionButton(onClick = { /*TODO*/ }) {}
+                FloatingActionButton(
+                    onClick = { navController.navigate(Routes.homepage) }, //To be changed to add job screen route
+                    shape = RoundedCornerShape(40),
+                    containerColor = Color.Red,
+                    contentColor = Color.White,
+                    elevation = FloatingActionButtonDefaults.elevation(8.dp)
+                ) {
+                    Icon(
+                        imageVector = Icons.Rounded.Add,
+                        contentDescription = "Add button"
+                    )
+                }
             },
 
             content = { paddingValues ->
