@@ -218,7 +218,7 @@ fun LoginScreen(navController: NavController, authViewModel: AuthViewModel) {
 
         Button(
             onClick = {
-                authViewModel.login(email, passwordText)
+                authViewModel.login(email, passwordText, context)
             },
             enabled = authState !is AuthState.Loading,
             colors = buttonColors,

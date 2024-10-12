@@ -76,6 +76,7 @@ fun VerificationEmailSentScreen(navController: NavController, authViewModel: Aut
         timerText = "You can resend the email again."
     }
 
+
     Column(
         modifier = Modifier.fillMaxSize(),
         verticalArrangement = Arrangement.Center,
@@ -124,7 +125,7 @@ fun VerificationEmailSentScreen(navController: NavController, authViewModel: Aut
         Button(
             onClick = {
                 if (isButtonEnabled) {
-                    authViewModel.resendVerificationEmail()
+                    authViewModel.resendVerificationEmail(context)
                     isButtonEnabled = false // Disable button immediately after click
                 }
             },

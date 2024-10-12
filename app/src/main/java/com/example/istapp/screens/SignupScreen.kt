@@ -267,7 +267,7 @@ fun SignupScreen(navController: NavController, authViewModel: AuthViewModel) {
 
         Button(
             onClick = {
-                authViewModel.signup(email, passwordText, firstname, lastname)
+                authViewModel.signup(email, passwordText, firstname, lastname, context)
                 navController.navigate(Routes.verificationEmailSent)
             },
 

@@ -30,7 +30,7 @@ class AuthViewModel : ViewModel() {
     }
 
     // Login functionality
-    fun login(email: String, password: String) {
+    fun login(email: String, password: String, context: Context) {
         if (email.isEmpty() || password.isEmpty()) {
             _authState.value = AuthState.Error("Email and password cannot be empty")
             return
@@ -49,15 +49,17 @@ class AuthViewModel : ViewModel() {
                     }
                 } else {
                     _authState.value = AuthState.Error(task.exception?.message ?: "Login failed. Please try again.")
+                    Toast.makeText(context, "Invalid email or password", Toast.LENGTH_SHORT).show()
                 }
             }
             .addOnFailureListener { exception ->
                 _authState.value = AuthState.Error(exception.message ?: "Login failed. Please try again.")
+                Toast.makeText(context, "Invalid email or password", Toast.LENGTH_SHORT).show()
             }
     }
 
     // Signup functionality with Username
-    fun signup(email: String, password: String, firstname: String, lastname: String) {
+    fun signup(email: String, password: String, firstname: String, lastname: String, context: Context) {
         if (email.isEmpty() || password.isEmpty() || firstname.isEmpty() || lastname.isEmpty()) {
             _authState.value = AuthState.Error("Email, password, and username cannot be empty")
             return
@@ -82,9 +84,9 @@ class AuthViewModel : ViewModel() {
                                     // Send email verification
                                     user.sendEmailVerification().addOnCompleteListener { verificationTask ->
                                         if (verificationTask.isSuccessful) {
-                                            _authState.value = AuthState.Success("A verification email has been sent. Please verify your email to continue.")
+                                            Toast.makeText(context, "A verification email has been sent. Please check your inbox.", Toast.LENGTH_SHORT).show()
                                         } else {
-                                            _authState.value = AuthState.Error("Failed to send verification email: ${verificationTask.exception?.message}")
+                                            Toast.makeText(context, "Failed to send verification email.", Toast.LENGTH_SHORT).show()
                                         }
                                     }
                                 } else {
@@ -137,7 +139,7 @@ class AuthViewModel : ViewModel() {
     }
 
     // Resend verification email functionality
-    fun resendVerificationEmail() {
+    fun resendVerificationEmail(context: Context) {
         val currentUser = auth.currentUser
         if (currentUser != null && !currentUser.isEmailVerified) {
             _authState.value = AuthState.Loading
@@ -145,9 +147,9 @@ class AuthViewModel : ViewModel() {
             currentUser.sendEmailVerification()
                 .addOnCompleteListener { task ->
                     if (task.isSuccessful) {
-                        _authState.value = AuthState.Success("A new verification email has been sent. Please check your inbox.")
+                        Toast.makeText(context, "A new verification email has been sent. Please check your inbox.", Toast.LENGTH_SHORT).show()
                     } else {
-                        _authState.value = AuthState.Error("Failed to resend verification email: ${task.exception?.message}")
+                        Toast.makeText(context, "Failed to send verification email.", Toast.LENGTH_SHORT).show()
                     }
                 }
                 .addOnFailureListener { exception ->
