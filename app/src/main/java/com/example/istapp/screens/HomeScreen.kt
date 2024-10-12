@@ -73,7 +73,7 @@ fun HomeScreen(navController: NavHostController, authViewModel: AuthViewModel) {
 
             floatingActionButton = {
                 FloatingActionButton(
-                    onClick = { navController.navigate(Routes.homepage) }, //To be changed to add job screen route
+                    onClick = { navController.navigate(Routes.homepage) }, //TODO: This should be changed to add job screen route
                     shape = RoundedCornerShape(40),
                     containerColor = Color.Red,
                     contentColor = Color.White,
