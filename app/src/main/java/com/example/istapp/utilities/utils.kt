@@ -20,4 +20,5 @@ class PreferencesManager(context: Context) {
     fun isLoginMessageShown(): Boolean {
         return sharedPreferences.getBoolean(KEY_LOGIN_MESSAGE_SHOWN, false)
     }
+
 }
