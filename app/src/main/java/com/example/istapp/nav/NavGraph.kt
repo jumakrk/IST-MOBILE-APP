@@ -6,6 +6,7 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import com.example.istapp.AuthViewModel
+import com.example.istapp.screens.AnimatedSplashScreen
 import com.example.istapp.screens.ForgotPasswordScreen
 import com.example.istapp.screens.HomeScreen
 import com.example.istapp.screens.LoginScreen
@@ -15,7 +16,7 @@ import com.example.istapp.screens.VerificationEmailSentScreen
 @Composable
 fun NavGraph(authViewModel: AuthViewModel){
     val navController = rememberNavController() //Initializing navController
-    NavHost(navController = navController, startDestination = Routes.login, builder = {
+    NavHost(navController = navController, startDestination = Routes.splashScreen, builder = {
         composable(Routes.login, content = {
             LoginScreen(navController, authViewModel)
         })
@@ -30,6 +31,9 @@ fun NavGraph(authViewModel: AuthViewModel){
         })
         composable(Routes.verificationEmailSent, content = {
             VerificationEmailSentScreen(navController, authViewModel)
+        })
+        composable(Routes.splashScreen, content = {
+            AnimatedSplashScreen(navController)
         })
     })
 }

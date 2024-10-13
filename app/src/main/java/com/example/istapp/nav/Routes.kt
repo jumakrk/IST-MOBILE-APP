@@ -5,7 +5,8 @@ object Routes {
     var login = "login"
     var signup = "signup"
     var forgotPassword = "forgotPassword"
-    var homepage = "home"
+    var homepage = "homepage"
     var verificationEmailSent = "verificationEmailSent"
     var profile = "profile"
+    var splashScreen = "splashScreen"
 }
