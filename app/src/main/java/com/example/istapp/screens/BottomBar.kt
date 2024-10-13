@@ -69,7 +69,7 @@ fun BottomBar(navController: NavHostController) {
                                 else
                                     bottomNavItem.unselectedIcon,
                                 contentDescription = bottomNavItem.label,
-                                tint = Color.LightGray
+                                tint = Color.Black
                             )
                         }
                     },

@@ -173,7 +173,7 @@ fun LoginScreen(navController: NavController, authViewModel: AuthViewModel) {
             modifier = Modifier
                 .width(300.dp)
                 .focusRequester(focusRequester)
-                .onFocusChanged { focusState -> emailIsFocused = focusState.isFocused}
+                .onFocusChanged { focusState -> emailIsFocused = focusState.isFocused }
                 .onKeyEvent { handleKeyEvent(it) }
         )
 
@@ -295,7 +295,8 @@ fun LoginScreen(navController: NavController, authViewModel: AuthViewModel) {
                         .size(30.dp)
                         .clickable {
                             isSigningIn = true // Set to true when sign-in starts
-                            val gso = GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
+                            val gso = GoogleSignInOptions
+                                .Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
                                 .requestIdToken(token)
                                 .requestEmail()
                                 .build()

@@ -3,10 +3,10 @@ package com.example.istapp.screens
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.rounded.AdminPanelSettings
 import androidx.compose.material.icons.rounded.Delete
-import androidx.compose.material.icons.rounded.Info
 import androidx.compose.material.icons.rounded.Lock
-import androidx.compose.material.icons.rounded.Person
+import androidx.compose.material.icons.rounded.People
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.NavigationDrawerItem
@@ -71,12 +71,12 @@ fun DrawerContent(
         NavigationDrawerItem(
             icon = {
                 Icon(
-                    imageVector = Icons.Rounded.Person,
-                    contentDescription = "Users",
+                    imageVector = Icons.Rounded.AdminPanelSettings,
+                    contentDescription = "Admins",
                     modifier = Modifier.size(27.dp)
                 )
             },
-            label = { Text(text = "Users", fontSize = 17.sp) },
+            label = { Text(text = "Admins", fontSize = 17.sp) },
             selected = false,
             onClick = {}
         )
@@ -86,12 +86,12 @@ fun DrawerContent(
         NavigationDrawerItem(
             icon = {
                 Icon(
-                    imageVector = Icons.Rounded.Info,
-                    contentDescription = "Roles",
+                    imageVector = Icons.Rounded.People,
+                    contentDescription = "Users",
                     modifier = Modifier.size(27.dp)
                 )
             },
-            label = { Text(text = "Roles", fontSize = 17.sp) },
+            label = { Text(text = "Users", fontSize = 17.sp) },
             selected = false,
             onClick = {}
         )

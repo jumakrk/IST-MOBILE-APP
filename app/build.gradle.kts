@@ -78,7 +78,7 @@ dependencies {
     //Dependency for including more icons in the app
     implementation(libs.androidx.material.icons.extended)
 
-
+    //Dependency for navigation
     implementation(libs.androidx.navigation.compose)
 
     // Google Sign-In
