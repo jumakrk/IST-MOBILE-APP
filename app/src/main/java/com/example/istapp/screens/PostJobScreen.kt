@@ -210,7 +210,11 @@ fun PostJobForm(paddingValues: PaddingValues) {
         Button(
             onClick = {
                 if (jobTitle.isNotEmpty() && company.isNotEmpty() && location.isNotEmpty() && description.isNotEmpty()) {
+                        // Show the loading indicator while uploading
+                        isLoading = true
                     uploadJobToFirestore(jobTitle, company, location, description, datePosted, context, db){
+                        // Hide the loading indicator after successful upload
+                        isLoading = false
                         // Clear the input fields after a successful post
                         jobTitle = ""
                         company = ""
@@ -225,7 +229,14 @@ fun PostJobForm(paddingValues: PaddingValues) {
             colors = buttonColors,
             modifier = Modifier.fillMaxWidth()
         ) {
-            Text(text = "Post Job")
+            if (isLoading) {
+                CircularProgressIndicator(
+                    color = Color.White,
+                    modifier = Modifier.size(24.dp)
+                )
+            } else {
+                Text(text = "Post Job")
+            }
         }
     }
 }

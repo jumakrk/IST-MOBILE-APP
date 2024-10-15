@@ -19,6 +19,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.Add
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
@@ -41,6 +42,9 @@ fun JobsScreen(navController: NavHostController, authViewModel: AuthViewModel) {
     val drawerState = rememberDrawerState(initialValue = DrawerValue.Closed)
     val scope = rememberCoroutineScope()
 
+    // Observe the user's role from the ViewModel
+    val userRole = authViewModel.userRole.observeAsState().value ?: "user"
+
     ModalNavigationDrawer(
         drawerState = drawerState,
         drawerContent = {
@@ -60,7 +64,8 @@ fun JobsScreen(navController: NavHostController, authViewModel: AuthViewModel) {
             bottomBar = {
                 BottomBar(navController = navController)
             },
-            floatingActionButton = {
+
+            floatingActionButton = { if (userRole == "admin") { // Only show the floating action button if the user is an admin
                 FloatingActionButton(
                     onClick = { navController.navigate(Routes.postJob) }, // Navigate to the add job screen
                     shape = RoundedCornerShape(40),
@@ -73,6 +78,7 @@ fun JobsScreen(navController: NavHostController, authViewModel: AuthViewModel) {
                         contentDescription = "Add Job"
                     )
                 }
+            }
             },
             content = { paddingValues ->
                 JobsScreenContent(
