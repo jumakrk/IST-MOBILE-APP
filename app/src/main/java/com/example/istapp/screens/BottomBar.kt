@@ -28,7 +28,6 @@ import com.example.istapp.nav.Routes
 
 @Composable
 fun BottomBar(navController: NavHostController) {
-
     // Determine selected index based on the current route
     val currentRoute = navController.currentBackStackEntry?.destination?.route
     val selectedIndex = bottomNavItems.indexOfFirst { it.route == currentRoute }
@@ -48,11 +47,16 @@ fun BottomBar(navController: NavHostController) {
                 NavigationBarItem(
                     selected = index == selected,
                     onClick = {
-                        selected = index
-                        navController.navigate(bottomNavItem.route) {
-                            // Prevent multiple copies of the same destination
-                            launchSingleTop = true
-                            restoreState = true
+                        if (selected != index) { // Only navigate if the clicked index is different
+                            selected = index
+                            navController.navigate(bottomNavItem.route) {
+                                // Prevent multiple copies of the same destination
+                                launchSingleTop = true
+                                restoreState = true
+                            }
+                        } else {
+                            // Optionally, scroll to top or do nothing if the item is already selected
+                            // For example: navController.popBackStack() or navigate to the same route with arguments
                         }
                     },
                     icon = {
@@ -97,6 +101,7 @@ fun BottomBar(navController: NavHostController) {
         }
     }
 }
+
 
 // Navigation items
 val bottomNavItems = listOf(
