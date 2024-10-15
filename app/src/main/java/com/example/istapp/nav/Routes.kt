@@ -10,4 +10,5 @@ object Routes {
     var profile = "profile"
     var splashScreen = "splashScreen"
     var jobs = "jobs"
+    var postJob = "postJob"
 }

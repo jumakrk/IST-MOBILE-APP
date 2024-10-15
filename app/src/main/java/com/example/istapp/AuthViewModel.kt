@@ -41,6 +41,10 @@ class AuthViewModel : ViewModel() {
         }
     }
 
+    fun getCurrentUserId(): String? {
+        return auth.currentUser?.uid
+    }
+
     // Login functionality
     fun login(email: String, password: String, context: Context) {
         if (email.isEmpty() || password.isEmpty()) {

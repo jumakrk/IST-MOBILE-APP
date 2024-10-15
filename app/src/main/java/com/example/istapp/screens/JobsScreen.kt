@@ -62,7 +62,7 @@ fun JobsScreen(navController: NavHostController, authViewModel: AuthViewModel) {
             },
             floatingActionButton = {
                 FloatingActionButton(
-                    onClick = { navController.navigate(Routes.jobs) }, // Navigate to the add job screen
+                    onClick = { navController.navigate(Routes.postJob) }, // Navigate to the add job screen
                     shape = RoundedCornerShape(40),
                     containerColor = Color.Red,
                     contentColor = Color.White,

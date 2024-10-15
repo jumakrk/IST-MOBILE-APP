@@ -75,6 +75,9 @@ dependencies {
     debugImplementation(libs.androidx.ui.tooling)
     debugImplementation(libs.androidx.ui.test.manifest)
 
+    //Dependency for coil
+    implementation (libs.coil.compose)
+
     //Dependency for including the firestore database
     implementation (libs.firebase.firestore.ktx)
 
