@@ -8,10 +8,22 @@ import androidx.lifecycle.ViewModel
 import com.example.istapp.utilities.PreferencesManager
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.UserProfileChangeRequest
+import com.google.firebase.firestore.FirebaseFirestore
 
 // This AuthViewModel contains the logic for the authentication process
 class AuthViewModel : ViewModel() {
     private val auth: FirebaseAuth = FirebaseAuth.getInstance()
+
+    // LiveData to hold the user's role
+    private val _userRole = MutableLiveData<String>()
+    val userRole: LiveData<String> = _userRole
+
+    init {
+        val currentUser = FirebaseAuth.getInstance().currentUser
+        if (currentUser != null) {
+            getUserRoleFromFirestore(currentUser.uid)
+        }
+    }
 
     private val _authState = MutableLiveData<AuthState>(AuthState.Loading)
     val authState: LiveData<AuthState> = _authState
@@ -42,6 +54,10 @@ class AuthViewModel : ViewModel() {
             .addOnCompleteListener { task ->
                 if (task.isSuccessful) {
                     val currentUser = auth.currentUser
+                    // Checks the user's role during login
+                    if (currentUser != null) {
+                        getUserRoleFromFirestore(currentUser.uid)
+                    }
                     if (currentUser != null && currentUser.isEmailVerified) {
                         _authState.value = AuthState.Authenticated
                     } else {
@@ -73,10 +89,18 @@ class AuthViewModel : ViewModel() {
                 if (task.isSuccessful) {
                     val user = auth.currentUser
                     user?.let {
+
+                        //Specified admin emails
+                        val adminEmails = listOf("jumakrk@gmail.com")
+                        // Determine the user's role based on the email
+                        val role = if (adminEmails.contains(email)) "admin" else "user"
+
                         // Update user profile with username
                         val profileUpdates = UserProfileChangeRequest.Builder()
                             .setDisplayName("$firstname $lastname") //converted concatenation to template
                             .build()
+                        // Sign-in successful, save user details
+                        saveUserDetailsToFirestore( "$firstname $lastname", role)
 
                         it.updateProfile(profileUpdates)
                             .addOnCompleteListener { profileUpdateTask ->
@@ -178,6 +202,52 @@ class AuthViewModel : ViewModel() {
         } else {
             _authState.value = AuthState.UnAuthenticated
         }
+    }
+
+    private fun saveUserDetailsToFirestore(username: String, role: String ) {
+        val user = FirebaseAuth.getInstance().currentUser
+        val db = FirebaseFirestore.getInstance()
+
+        user?.let {
+            // Create a user map to store user details
+            val firstname = it.displayName?.substringBefore(" ")
+            val lastname = it.displayName?.substringAfter(" ")
+            val userDetails = hashMapOf(
+                "uid" to it.uid,
+                "$firstname $lastname" to username,
+                "email" to it.email,
+                "role" to role
+            )
+
+            // Save user details in the "users" collection with the document ID as the user UID
+            db.collection("users").document(it.uid)
+                .set(userDetails)
+                .addOnSuccessListener {
+                    // Success handling
+                    println("User details saved successfully")
+                }
+                .addOnFailureListener { e ->
+                    // Failure handling
+                    println("Error saving user details: ${e.message}")
+                }
+        }
+    }
+
+    // Retrieve user role from Firestore
+    private fun getUserRoleFromFirestore(uid: String) {
+        val db = FirebaseFirestore.getInstance()
+        db.collection("users").document(uid).get()
+            .addOnSuccessListener { document ->
+                if (document != null && document.exists()) {
+                    val role = document.getString("role") ?: "user"
+                    _userRole.value = role
+                } else {
+                    _userRole.value = "user" // Default to "user" if no role is found
+                }
+            }
+            .addOnFailureListener {
+                _userRole.value = "user" // Default to "user" in case of an error
+            }
     }
 }
 

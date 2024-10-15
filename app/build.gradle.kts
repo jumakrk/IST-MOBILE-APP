@@ -75,6 +75,9 @@ dependencies {
     debugImplementation(libs.androidx.ui.tooling)
     debugImplementation(libs.androidx.ui.test.manifest)
 
+    //Dependency for including the firestore database
+    implementation (libs.firebase.firestore.ktx)
+
     //Dependency for including more icons in the app
     implementation(libs.androidx.material.icons.extended)
 

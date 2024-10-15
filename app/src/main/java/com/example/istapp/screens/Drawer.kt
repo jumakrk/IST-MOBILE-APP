@@ -5,13 +5,13 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.AdminPanelSettings
 import androidx.compose.material.icons.rounded.Delete
-import androidx.compose.material.icons.rounded.Lock
 import androidx.compose.material.icons.rounded.People
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.NavigationDrawerItem
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.painterResource
@@ -67,6 +67,9 @@ fun DrawerContent(
 
         Spacer(modifier = Modifier.height(4.dp))
 
+        // Observe the user's role from the ViewModel
+        val userRole = authViewModel.userRole.observeAsState().value ?: "user"
+        if (userRole == "admin") {
         // Navigation items
         NavigationDrawerItem(
             icon = {
@@ -95,21 +98,7 @@ fun DrawerContent(
             selected = false,
             onClick = {}
         )
-
-        Spacer(modifier = Modifier.height(4.dp))
-
-        NavigationDrawerItem(
-            icon = {
-                Icon(
-                    imageVector = Icons.Rounded.Lock,
-                    contentDescription = "Permissions",
-                    modifier = Modifier.size(27.dp)
-                )
-            },
-            label = { Text(text = "Permissions", fontSize = 17.sp) },
-            selected = false,
-            onClick = {}
-        )
+        }
 
         // Spacer to push the logout button to the bottom
         Spacer(modifier = Modifier.weight(1f))
