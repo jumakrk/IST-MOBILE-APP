@@ -9,4 +9,5 @@ object Routes {
     var verificationEmailSent = "verificationEmailSent"
     var profile = "profile"
     var splashScreen = "splashScreen"
+    var jobs = "jobs"
 }

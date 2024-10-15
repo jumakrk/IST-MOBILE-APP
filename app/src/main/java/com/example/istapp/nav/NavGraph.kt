@@ -9,6 +9,7 @@ import com.example.istapp.AuthViewModel
 import com.example.istapp.screens.AnimatedSplashScreen
 import com.example.istapp.screens.ForgotPasswordScreen
 import com.example.istapp.screens.HomeScreen
+import com.example.istapp.screens.JobsScreen
 import com.example.istapp.screens.LoginScreen
 import com.example.istapp.screens.SignupScreen
 import com.example.istapp.screens.VerificationEmailSentScreen
@@ -34,6 +35,9 @@ fun NavGraph(authViewModel: AuthViewModel){
         })
         composable(Routes.splashScreen, content = {
             AnimatedSplashScreen(navController)
+        })
+        composable(Routes.jobs, content = {
+            JobsScreen(navController, authViewModel)
         })
     })
 }

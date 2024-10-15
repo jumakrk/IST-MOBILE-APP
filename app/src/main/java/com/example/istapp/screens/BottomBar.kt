@@ -12,6 +12,7 @@ import androidx.compose.material3.BadgedBox
 import androidx.compose.material3.Icon
 import androidx.compose.material3.NavigationBar
 import androidx.compose.material3.NavigationBarItem
+import androidx.compose.material3.NavigationBarItemDefaults
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -28,15 +29,19 @@ import com.example.istapp.nav.Routes
 @Composable
 fun BottomBar(navController: NavHostController) {
 
+    // Determine selected index based on the current route
+    val currentRoute = navController.currentBackStackEntry?.destination?.route
+    val selectedIndex = bottomNavItems.indexOfFirst { it.route == currentRoute }
+
     // Selected item state
-    var selected by remember { mutableIntStateOf(0) }
+    var selected by remember { mutableIntStateOf(selectedIndex.takeIf { it != -1 } ?: 0) }
 
     // BottomBar content
     Box(
         modifier = Modifier
             .height(85.dp)
     ) {
-        NavigationBar (
+        NavigationBar(
             containerColor = Color.Red,
         ) {
             bottomNavItems.forEachIndexed { index, bottomNavItem ->
@@ -44,24 +49,27 @@ fun BottomBar(navController: NavHostController) {
                     selected = index == selected,
                     onClick = {
                         selected = index
-                        navController.navigate(bottomNavItem.route)
+                        navController.navigate(bottomNavItem.route) {
+                            // Prevent multiple copies of the same destination
+                            launchSingleTop = true
+                            restoreState = true
+                        }
                     },
                     icon = {
                         BadgedBox(
                             badge = {
-                                //Check if the item has a badge and show the Badge for the notification
-                                if (bottomNavItem.badges != 0) {
+                                if (bottomNavItem.badges != 0 || bottomNavItem.hasNews) {
                                     Badge {
-                                        Text(
-                                            text = bottomNavItem.badges.toString()
-                                        )
+                                        if (bottomNavItem.badges != 0) {
+                                            Text(
+                                                text = bottomNavItem.badges.toString(),
+                                                color = Color.White // Change text color if needed
+                                            )
+                                        }
                                     }
-                                } else if (bottomNavItem.hasNews) {
-                                    Badge()
                                 }
                             }
                         ) {
-                            // Show the icon for the item
                             Icon(
                                 imageVector =
                                 if (index == selected)
@@ -69,11 +77,21 @@ fun BottomBar(navController: NavHostController) {
                                 else
                                     bottomNavItem.unselectedIcon,
                                 contentDescription = bottomNavItem.label,
-                                tint = Color.Black
+                                tint = if (index == selected) Color.White else Color.LightGray // Change icon color based on selection
                             )
                         }
                     },
-                    label = { Text(text = bottomNavItem.label) }
+                    label = {
+                        Text(
+                            text = bottomNavItem.label,
+                            color = if (index == selected) Color.White else Color.LightGray // Change text color based on selection
+                        )
+                    },
+                    colors = NavigationBarItemDefaults.colors(
+                        selectedIconColor = Color.White, // Icon color when selected
+                        unselectedIconColor = Color.LightGray,    // Icon color when unselected
+                        indicatorColor = Color.Transparent // Set indicator color to transparent
+                    ),
                 )
             }
         }
@@ -94,7 +112,7 @@ val bottomNavItems = listOf(
 
     BottomNavItem(
         label = "Jobs",
-        route = Routes.login, //TODO: Change to jobs screen
+        route = Routes.jobs, //TODO: Change to jobs screen
         icon = Icons.Rounded.BusinessCenter,
         selectedIcon = Icons.Filled.BusinessCenter,
         unselectedIcon = Icons.Rounded.BusinessCenter,
@@ -111,4 +129,4 @@ data class BottomNavItem(
     val unselectedIcon: ImageVector,
     val badges: Int,
     val hasNews: Boolean,
-    )
+)
