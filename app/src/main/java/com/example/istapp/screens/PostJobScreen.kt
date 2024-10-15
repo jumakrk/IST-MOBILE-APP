@@ -61,6 +61,7 @@ fun PostJobForm(paddingValues: PaddingValues) {
     var location by remember { mutableStateOf("") }
     var description by remember { mutableStateOf("") }
     val context = LocalContext.current
+    var isLoading by remember { mutableStateOf(false) }
 
     // Firestore instance
     val db = FirebaseFirestore.getInstance()
@@ -209,7 +210,13 @@ fun PostJobForm(paddingValues: PaddingValues) {
         Button(
             onClick = {
                 if (jobTitle.isNotEmpty() && company.isNotEmpty() && location.isNotEmpty() && description.isNotEmpty()) {
-                    uploadJobToFirestore(jobTitle, company, location, description, datePosted, context, db)
+                    uploadJobToFirestore(jobTitle, company, location, description, datePosted, context, db){
+                        // Clear the input fields after a successful post
+                        jobTitle = ""
+                        company = ""
+                        location = ""
+                        description = ""
+                    }
                 } else {
                     Toast.makeText(context, "Please fill all fields", Toast.LENGTH_SHORT).show()
                 }
@@ -218,19 +225,12 @@ fun PostJobForm(paddingValues: PaddingValues) {
             colors = buttonColors,
             modifier = Modifier.fillMaxWidth()
         ) {
-            if (authState is AuthState.Loading) {
-                CircularProgressIndicator(
-                    color = Color.White,
-                    modifier = Modifier.size(24.dp)
-                )
-            } else {
-                Text(text = "Post Job")
-            }
+            Text(text = "Post Job")
         }
     }
 }
 
-private fun uploadJobToFirestore(jobTitle: String, company: String, location: String, description: String, datePosted: String, context: Context, db: FirebaseFirestore) {
+private fun uploadJobToFirestore(jobTitle: String, company: String, location: String, description: String, datePosted: String, context: Context, db: FirebaseFirestore, onSuccess: () -> Unit) {
     // Create job data
     val jobData = hashMapOf(
         "title" to jobTitle,
@@ -245,6 +245,7 @@ private fun uploadJobToFirestore(jobTitle: String, company: String, location: St
         .add(jobData)
         .addOnSuccessListener {
             Toast.makeText(context, "Job posted successfully", Toast.LENGTH_SHORT).show()
+            onSuccess()
         }
         .addOnFailureListener { e ->
             Toast.makeText(context, "Error posting job: ${e.message}", Toast.LENGTH_SHORT).show()
