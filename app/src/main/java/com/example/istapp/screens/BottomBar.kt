@@ -54,9 +54,10 @@ fun BottomBar(navController: NavHostController) {
                                 launchSingleTop = true
                                 restoreState = true
                             }
-                        } else {
-                            // Optionally, scroll to top or do nothing if the item is already selected
-                            // For example: navController.popBackStack() or navigate to the same route with arguments
+                        } else{
+                            if (index == 0) { // Home icon clicked while already selected
+                                navController.popBackStack(Routes.homepage, false)
+                            }
                         }
                     },
                     icon = {
