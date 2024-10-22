@@ -235,7 +235,7 @@ fun PostJobForm(paddingValues: PaddingValues) {
         item {
         OutlinedTextField(
             value = postedBy,
-            onValueChange = { postedBy = it.trim() },
+            onValueChange = { postedBy = it },
             label = {
                 Text(
                     text = "Posted By",
@@ -296,7 +296,7 @@ fun PostJobForm(paddingValues: PaddingValues) {
 
                         // Show the loading indicator while uploading
                         isLoading = true
-                    uploadJobToFirestore(jobTitle, company, location, description, jobType, datePosted, postedBy, context, db){
+                    uploadJobToFirestore(jobTitle, company, location, description, jobType, postedBy, datePosted, context, db){
                         // Hide the loading indicator after successful upload
                         isLoading = false
                         // Clear the input fields after a successful post
@@ -335,7 +335,7 @@ private fun uploadJobToFirestore(jobTitle: String, company: String, location: St
         "title" to jobTitle,
         "company" to company,
         "location" to location,
-        "description" to description,
+        "description" to description.split("\n").joinToString(separator = "") { "<p>$it</p>" }, // HTML formatting,
         "jobType" to jobType,
         "postedBy" to postedBy,
         "datePosted" to datePosted
