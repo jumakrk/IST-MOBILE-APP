@@ -3,9 +3,11 @@ package com.example.istapp.screens
 import android.content.Context
 import android.widget.Toast
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.runtime.livedata.observeAsState
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
@@ -61,6 +63,8 @@ fun PostJobForm(paddingValues: PaddingValues) {
     var location by remember { mutableStateOf("") }
     var description by remember { mutableStateOf("") }
     var postedBy by remember { mutableStateOf("") }
+    var isSoftwareDevelopment by remember { mutableStateOf(false) }
+    var isCyberSecurity by remember { mutableStateOf(false) }
     val context = LocalContext.current
     var isLoading by remember { mutableStateOf(false) }
 
@@ -82,13 +86,20 @@ fun PostJobForm(paddingValues: PaddingValues) {
 
     val focusRequester = remember { FocusRequester() }
 
-    Column(
+    // Get the current date
+    val datePosted = remember { SimpleDateFormat("yyyy-MM-dd", Locale.getDefault()).format(Date()) }
+
+    val authViewModel = AuthViewModel()
+    val authState by authViewModel.authState.observeAsState(AuthState.Loading)
+
+    LazyColumn(
         modifier = Modifier
             .fillMaxSize()
             .padding(paddingValues)
-            .padding(12.dp),
-        verticalArrangement = Arrangement.spacedBy(12.dp)
+            .padding(16.dp),
+        verticalArrangement = Arrangement.spacedBy(16.dp)
     ) {
+        item {
         OutlinedTextField(
             value = jobTitle,
             onValueChange = { jobTitle = it },
@@ -110,7 +121,9 @@ fun PostJobForm(paddingValues: PaddingValues) {
                 .onFocusChanged { focusState -> jobTitleIsFocused = focusState.isFocused }
                 .fillMaxWidth(),
         )
+        }
 
+        item {
         OutlinedTextField(
             value = company,
             onValueChange = { company = it },
@@ -132,7 +145,9 @@ fun PostJobForm(paddingValues: PaddingValues) {
                 .onFocusChanged { focusState -> companyIsFocused = focusState.isFocused }
                 .fillMaxWidth(),
         )
+        }
 
+        item {
         OutlinedTextField(
             value = location,
             onValueChange = { location = it },
@@ -154,7 +169,9 @@ fun PostJobForm(paddingValues: PaddingValues) {
                 .onFocusChanged { focusState -> locationIsFocused = focusState.isFocused }
                 .fillMaxWidth(),
         )
+        }
 
+        item {
         OutlinedTextField(
             value = description,
             onValueChange = { description = it },
@@ -178,7 +195,44 @@ fun PostJobForm(paddingValues: PaddingValues) {
                 .height(120.dp),
             maxLines = 100
         )
+        }
 
+        item {
+            // Job type selection checkboxes
+            Text("Job Type", color = Color.Gray) // Label for job type selection
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                modifier = Modifier.fillMaxWidth()
+            ) {
+                Checkbox(
+                    checked = isSoftwareDevelopment,
+                    onCheckedChange = { isSoftwareDevelopment = it },
+                    colors = CheckboxDefaults.colors(checkedColor = Color.Red)
+                )
+                Text(
+                    text = "Software Development",
+                    modifier = Modifier.padding(start = 8.dp),
+                    color = Color.Gray
+                )
+            }
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                modifier = Modifier.fillMaxWidth()
+            ) {
+                Checkbox(
+                    checked = isCyberSecurity,
+                    onCheckedChange = { isCyberSecurity = it },
+                    colors = CheckboxDefaults.colors(checkedColor = Color.Red)
+                )
+                Text(
+                    text = "Cyber Security",
+                    modifier = Modifier.padding(start = 8.dp),
+                    color = Color.Gray
+                )
+            }
+        }
+
+        item {
         OutlinedTextField(
             value = postedBy,
             onValueChange = { postedBy = it.trim() },
@@ -200,10 +254,9 @@ fun PostJobForm(paddingValues: PaddingValues) {
                 .onFocusChanged { focusState -> postedByIsFocused = focusState.isFocused }
                 .fillMaxWidth(),
         )
+        }
 
-        // Get the current date
-        val datePosted = remember { SimpleDateFormat("yyyy-MM-dd", Locale.getDefault()).format(Date()) }
-
+        item {
         // Display date posted, not editable
         OutlinedTextField(
             value = datePosted,
@@ -227,16 +280,23 @@ fun PostJobForm(paddingValues: PaddingValues) {
                 .fillMaxWidth(),
             readOnly = true
         )
+        }
 
-        val authViewModel = AuthViewModel()
-        val authState by authViewModel.authState.observeAsState(AuthState.Loading)
-
+        item {
         Button(
             onClick = {
                 if (jobTitle.isNotEmpty() && company.isNotEmpty() && location.isNotEmpty() && description.isNotEmpty()) {
+
+                    // Determine the job type
+                    val jobType = when {
+                        isSoftwareDevelopment -> "Software Development"
+                        isCyberSecurity -> "Cyber Security"
+                        else -> "Other" // Default value if neither is selected
+                    }
+
                         // Show the loading indicator while uploading
                         isLoading = true
-                    uploadJobToFirestore(jobTitle, company, location, description, datePosted, postedBy, context, db){
+                    uploadJobToFirestore(jobTitle, company, location, description, jobType, datePosted, postedBy, context, db){
                         // Hide the loading indicator after successful upload
                         isLoading = false
                         // Clear the input fields after a successful post
@@ -245,6 +305,8 @@ fun PostJobForm(paddingValues: PaddingValues) {
                         location = ""
                         description = ""
                         postedBy = ""
+                        isSoftwareDevelopment = false // Reset job type selections when posting
+                        isCyberSecurity = false
                     }
                 } else {
                     Toast.makeText(context, "Please fill all fields", Toast.LENGTH_SHORT).show()
@@ -263,16 +325,18 @@ fun PostJobForm(paddingValues: PaddingValues) {
                 Text(text = "Post Job")
             }
         }
+        }
     }
 }
 
-private fun uploadJobToFirestore(jobTitle: String, company: String, location: String, description: String, postedBy: String, datePosted: String, context: Context, db: FirebaseFirestore, onSuccess: () -> Unit) {
+private fun uploadJobToFirestore(jobTitle: String, company: String, location: String, description: String, jobType: String, postedBy: String, datePosted: String, context: Context, db: FirebaseFirestore, onSuccess: () -> Unit) {
     // Create job data
     val jobData = hashMapOf(
         "title" to jobTitle,
         "company" to company,
         "location" to location,
         "description" to description,
+        "jobType" to jobType,
         "postedBy" to postedBy,
         "datePosted" to datePosted
     )
