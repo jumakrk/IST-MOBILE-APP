@@ -60,6 +60,7 @@ fun PostJobForm(paddingValues: PaddingValues) {
     var company by remember { mutableStateOf("") }
     var location by remember { mutableStateOf("") }
     var description by remember { mutableStateOf("") }
+    var postedBy by remember { mutableStateOf("") }
     val context = LocalContext.current
     var isLoading by remember { mutableStateOf(false) }
 
@@ -76,6 +77,7 @@ fun PostJobForm(paddingValues: PaddingValues) {
     var companyIsFocused by remember { mutableStateOf(false) }
     var locationIsFocused by remember { mutableStateOf(false) }
     var descriptionIsFocused by remember { mutableStateOf(false) }
+    var postedByIsFocused by remember { mutableStateOf(false) }
     var datePostedIsFocused by remember { mutableStateOf(false) }
 
     val focusRequester = remember { FocusRequester() }
@@ -84,8 +86,8 @@ fun PostJobForm(paddingValues: PaddingValues) {
         modifier = Modifier
             .fillMaxSize()
             .padding(paddingValues)
-            .padding(16.dp),
-        verticalArrangement = Arrangement.spacedBy(16.dp)
+            .padding(12.dp),
+        verticalArrangement = Arrangement.spacedBy(12.dp)
     ) {
         OutlinedTextField(
             value = jobTitle,
@@ -177,6 +179,28 @@ fun PostJobForm(paddingValues: PaddingValues) {
             maxLines = 100
         )
 
+        OutlinedTextField(
+            value = postedBy,
+            onValueChange = { postedBy = it.trim() },
+            label = {
+                Text(
+                    text = "Posted By",
+                    color = if (postedByIsFocused) Color.Red else Color.Gray
+                )
+            },
+            colors = OutlinedTextFieldDefaults.colors(
+                focusedBorderColor = Color.Red,
+                unfocusedBorderColor = Color.Gray,
+                focusedLabelColor = Color.Red,
+                unfocusedLabelColor = Color.Gray,
+                cursorColor = Color.Red
+            ),
+            modifier = Modifier
+                .focusRequester(focusRequester)
+                .onFocusChanged { focusState -> postedByIsFocused = focusState.isFocused }
+                .fillMaxWidth(),
+        )
+
         // Get the current date
         val datePosted = remember { SimpleDateFormat("yyyy-MM-dd", Locale.getDefault()).format(Date()) }
 
@@ -212,7 +236,7 @@ fun PostJobForm(paddingValues: PaddingValues) {
                 if (jobTitle.isNotEmpty() && company.isNotEmpty() && location.isNotEmpty() && description.isNotEmpty()) {
                         // Show the loading indicator while uploading
                         isLoading = true
-                    uploadJobToFirestore(jobTitle, company, location, description, datePosted, context, db){
+                    uploadJobToFirestore(jobTitle, company, location, description, datePosted, postedBy, context, db){
                         // Hide the loading indicator after successful upload
                         isLoading = false
                         // Clear the input fields after a successful post
@@ -220,6 +244,7 @@ fun PostJobForm(paddingValues: PaddingValues) {
                         company = ""
                         location = ""
                         description = ""
+                        postedBy = ""
                     }
                 } else {
                     Toast.makeText(context, "Please fill all fields", Toast.LENGTH_SHORT).show()
@@ -241,13 +266,14 @@ fun PostJobForm(paddingValues: PaddingValues) {
     }
 }
 
-private fun uploadJobToFirestore(jobTitle: String, company: String, location: String, description: String, datePosted: String, context: Context, db: FirebaseFirestore, onSuccess: () -> Unit) {
+private fun uploadJobToFirestore(jobTitle: String, company: String, location: String, description: String, postedBy: String, datePosted: String, context: Context, db: FirebaseFirestore, onSuccess: () -> Unit) {
     // Create job data
     val jobData = hashMapOf(
         "title" to jobTitle,
         "company" to company,
         "location" to location,
         "description" to description,
+        "postedBy" to postedBy,
         "datePosted" to datePosted
     )
 
