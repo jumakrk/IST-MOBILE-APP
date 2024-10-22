@@ -335,7 +335,7 @@ private fun uploadJobToFirestore(jobTitle: String, company: String, location: St
         "title" to jobTitle,
         "company" to company,
         "location" to location,
-        "description" to description.split("\n").joinToString(separator = "") { "<p>$it</p>" }, // HTML formatting,
+        "description" to description,
         "jobType" to jobType,
         "postedBy" to postedBy,
         "datePosted" to datePosted
