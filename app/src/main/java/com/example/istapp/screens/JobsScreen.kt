@@ -101,8 +101,10 @@ data class Job(
     val title: String = "",
     val company: String = "",
     val location: String = "",
+    val applicationDeadline: String = "",
     val description: String = "",
-    val postedBy: String = ""
+    val postedBy: String = "",
+    val datePosted: String = ""
 )
 
 object FirestoreService {
@@ -207,9 +209,9 @@ fun JobCard(job: Job, navController: NavHostController) {
                 fontSize = 14.sp,
                 color = Color.Gray
             )
-            Spacer(modifier = Modifier.height(4.dp))
+            Spacer(modifier = Modifier.height(8.dp))
             Text(
-                text = "Posted by: ${job.postedBy}",
+                text = "Application Deadline: ${job.applicationDeadline}",
                 fontSize = 14.sp,
                 color = Color.Gray
             )
@@ -220,6 +222,18 @@ fun JobCard(job: Job, navController: NavHostController) {
                 color = Color.Black,
                 maxLines = 3,
                 overflow = TextOverflow.Ellipsis
+            )
+            Spacer(modifier = Modifier.height(4.dp))
+            Text(
+                text = "Posted by: ${job.postedBy}",
+                fontSize = 14.sp,
+                color = Color.Gray
+            )
+            Spacer(modifier = Modifier.height(8.dp))
+            Text(
+                text = "Posted on: ${job.datePosted}",
+                fontSize = 14.sp,
+                color = Color.Gray
             )
         }
     }
