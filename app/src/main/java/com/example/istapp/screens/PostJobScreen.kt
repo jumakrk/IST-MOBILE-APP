@@ -4,6 +4,8 @@ import android.content.Context
 import android.widget.Toast
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.DateRange
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.runtime.livedata.observeAsState
@@ -83,6 +85,7 @@ fun PostJobForm(paddingValues: PaddingValues) {
     var descriptionIsFocused by remember { mutableStateOf(false) }
     var postedByIsFocused by remember { mutableStateOf(false) }
     var datePostedIsFocused by remember { mutableStateOf(false) }
+    var applicationDeadlineIsFocused by remember { mutableStateOf(false) }
 
     val focusRequester = remember { FocusRequester() }
 
@@ -91,6 +94,26 @@ fun PostJobForm(paddingValues: PaddingValues) {
 
     val authViewModel = AuthViewModel()
     val authState by authViewModel.authState.observeAsState(AuthState.Loading)
+
+    // State for the application deadline
+    var applicationDeadline by remember { mutableStateOf("") }
+
+    // Date picker dialog for the application deadline
+    val datePickerDialog = remember {
+        android.app.DatePickerDialog(
+            context,
+            { _, year, month, dayOfMonth ->
+                // Format the selected date
+                val calendar = Calendar.getInstance()
+                calendar.set(year, month, dayOfMonth)
+                applicationDeadline =
+                    SimpleDateFormat("yyyy-MM-dd", Locale.getDefault()).format(calendar.time)
+            },
+            Calendar.getInstance().get(Calendar.YEAR),
+            Calendar.getInstance().get(Calendar.MONTH),
+            Calendar.getInstance().get(Calendar.DAY_OF_MONTH)
+        )
+    }
 
     LazyColumn(
         modifier = Modifier
@@ -283,6 +306,37 @@ fun PostJobForm(paddingValues: PaddingValues) {
         }
 
         item {
+            // Display and pick the application deadline date
+            OutlinedTextField(
+                value = applicationDeadline,
+                onValueChange = {},
+                label = {
+                    Text(
+                        text = "Application Deadline",
+                        color = if (applicationDeadlineIsFocused) Color.Red else Color.Gray
+                    )
+                },
+                colors = OutlinedTextFieldDefaults.colors(
+                    focusedBorderColor = Color.Red,
+                    unfocusedBorderColor = Color.Gray,
+                    focusedLabelColor = Color.Red,
+                    unfocusedLabelColor = Color.Gray,
+                    cursorColor = Color.Red
+                ),
+                modifier = Modifier
+                    .focusRequester(focusRequester)
+                    .onFocusChanged { focusState -> applicationDeadlineIsFocused = focusState.isFocused }
+                    .fillMaxWidth(),
+                readOnly = true,
+                trailingIcon = {
+                    IconButton(onClick = { datePickerDialog.show() }) {
+                        Icon(imageVector = Icons.Default.DateRange, contentDescription = "Pick a date")
+                    }
+                }
+            )
+        }
+
+        item {
         Button(
             onClick = {
                 if (jobTitle.isNotEmpty() && company.isNotEmpty() && location.isNotEmpty() && description.isNotEmpty()) {
@@ -296,7 +350,7 @@ fun PostJobForm(paddingValues: PaddingValues) {
 
                         // Show the loading indicator while uploading
                         isLoading = true
-                    uploadJobToFirestore(jobTitle, company, location, description, jobType, postedBy, datePosted, context, db){
+                    uploadJobToFirestore(jobTitle, company, location, description, jobType, postedBy, datePosted, applicationDeadline, context, db){
                         // Hide the loading indicator after successful upload
                         isLoading = false
                         // Clear the input fields after a successful post
@@ -305,6 +359,7 @@ fun PostJobForm(paddingValues: PaddingValues) {
                         location = ""
                         description = ""
                         postedBy = ""
+                        applicationDeadline = ""
                         isSoftwareDevelopment = false // Reset job type selections when posting
                         isCyberSecurity = false
                     }
@@ -329,7 +384,7 @@ fun PostJobForm(paddingValues: PaddingValues) {
     }
 }
 
-private fun uploadJobToFirestore(jobTitle: String, company: String, location: String, description: String, jobType: String, postedBy: String, datePosted: String, context: Context, db: FirebaseFirestore, onSuccess: () -> Unit) {
+private fun uploadJobToFirestore(jobTitle: String, company: String, location: String, description: String, jobType: String, postedBy: String, datePosted: String, applicationDeadline: String, context: Context, db: FirebaseFirestore, onSuccess: () -> Unit) {
     // Create job data
     val jobData = hashMapOf(
         "title" to jobTitle,
@@ -338,7 +393,8 @@ private fun uploadJobToFirestore(jobTitle: String, company: String, location: St
         "description" to description,
         "jobType" to jobType,
         "postedBy" to postedBy,
-        "datePosted" to datePosted
+        "datePosted" to datePosted,
+        "applicationDeadline" to applicationDeadline
     )
 
     // Save job data to Firestore
