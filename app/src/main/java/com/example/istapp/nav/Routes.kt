@@ -11,4 +11,5 @@ object Routes {
     var splashScreen = "splashScreen"
     var jobs = "jobs"
     var postJob = "postJob"
+    var viewJob = "view_job/{jobId}"
 }

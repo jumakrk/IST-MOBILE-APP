@@ -25,6 +25,7 @@ import com.example.istapp.nav.Routes
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun TopBar(navController: NavHostController, modifier: Modifier = Modifier, scrollBehavior: TopAppBarScrollBehavior, onOpenDrawer: () -> Unit) {
+    val currentRoute = navController.currentBackStackEntry?.destination?.route
     // TopAppBar with title, navigation icon, and action icons
     TopAppBar(
         modifier = modifier,
@@ -36,11 +37,37 @@ fun TopBar(navController: NavHostController, modifier: Modifier = Modifier, scro
             actionIconContentColor = Color.LightGray,
         ),
         title = {
-            Text(
-                text = "IST Alumni App",
-                fontSize = 16.sp,
-                fontWeight = FontWeight.Bold
-            )
+            // Display the title based on the current route
+            when (currentRoute) {
+                Routes.jobs -> {
+                    Text(
+                        text = "Jobs",
+                        fontSize = 16.sp,
+                        fontWeight = FontWeight.Bold
+                    )
+                }
+                Routes.profile -> {
+                    Text(
+                        text = "Profile",
+                        fontSize = 16.sp,
+                        fontWeight = FontWeight.Bold
+                    )
+                }
+                Routes.postJob -> {
+                    Text(
+                        text = "Post Job",
+                        fontSize = 16.sp,
+                        fontWeight = FontWeight.Bold
+                    )
+                }
+                Routes.viewJob -> {
+                    Text(
+                        text = "View Job",
+                        fontSize = 16.sp,
+                        fontWeight = FontWeight.Bold
+                    )
+                }
+            }
         },
         navigationIcon = {
             Icon(

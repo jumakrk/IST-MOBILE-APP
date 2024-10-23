@@ -186,7 +186,8 @@ fun JobCard(job: Job, navController: NavHostController) {
             .clip(RoundedCornerShape(20.dp))
             .background(Color.LightGray)
             .clickable {
-                navController.navigate("${Routes.jobs}/${job.title}")
+                val jobId = job.title // Assuming jobId is a unique identifier for each job
+                navController.navigate("view_job/$jobId")
             }
             .padding(16.dp)
     ) {
