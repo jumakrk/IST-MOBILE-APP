@@ -1,12 +1,12 @@
 package com.example.istapp.screens
 
 import android.annotation.SuppressLint
-import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -18,22 +18,22 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.Add
+import androidx.compose.material.icons.rounded.LocationOn
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
 import com.example.istapp.AuthViewModel
 import com.example.istapp.nav.Routes
@@ -104,7 +104,8 @@ data class Job(
     val applicationDeadline: String = "",
     val description: String = "",
     val postedBy: String = "",
-    val datePosted: String = ""
+    val datePosted: String = "",
+    val type: String = ""
 )
 
 object FirestoreService {
@@ -143,7 +144,7 @@ class JobsViewModel : ViewModel() {
 fun JobsScreenContent(
     paddingValues: PaddingValues,
     navController: NavHostController,
-    jobsViewModel: JobsViewModel = androidx.lifecycle.viewmodel.compose.viewModel()
+    jobsViewModel: JobsViewModel = viewModel()
 ) {
     val jobs = jobsViewModel.jobs.observeAsState(emptyList())
 
@@ -171,71 +172,131 @@ fun JobsScreenContent(
             verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
             items(jobs.value.size) { index ->
-                JobCard(job = jobs.value[index], navController = navController)
+                JobCard(job = jobs.value[index], navController)
             }
         }
     }
 }
 
+
 @Composable
 fun JobCard(job: Job, navController: NavHostController) {
-    Box(
+    Card(
         modifier = Modifier
-            .padding(horizontal = 16.dp)
             .fillMaxWidth()
-            .clip(RoundedCornerShape(20.dp))
-            .background(Color.LightGray)
-            .clickable {
-                val jobId = job.title // Assuming jobId is a unique identifier for each job
-                navController.navigate("view_job/$jobId")
-            }
-            .padding(16.dp)
+            .padding(horizontal = 16.dp, vertical = 8.dp),
+        elevation = CardDefaults.cardElevation(defaultElevation = 4.dp),
+        colors = CardDefaults.cardColors(
+            containerColor = MaterialTheme.colorScheme.surface
+        ),
+        shape = RoundedCornerShape(12.dp)
     ) {
-        Column {
-            Text(
-                text = job.title,
-                fontSize = 20.sp,
-                fontWeight = FontWeight.Bold,
-                color = Color.Black
-            )
-            Spacer(modifier = Modifier.height(4.dp))
-            Text(
-                text = job.company,
-                fontSize = 16.sp,
-                color = Color.DarkGray
-            )
-            Spacer(modifier = Modifier.height(4.dp))
-            Text(
-                text = job.location,
-                fontSize = 14.sp,
-                color = Color.Gray
-            )
+        Column(
+            modifier = Modifier
+                .padding(16.dp)
+                .fillMaxWidth()
+        ) {
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Column(modifier = Modifier.weight(1f)) {
+                    Text(
+                        text = job.title,
+                        style = MaterialTheme.typography.titleLarge,
+                        color = MaterialTheme.colorScheme.onSurface,
+                        fontWeight = FontWeight.Bold
+                    )
+                    Spacer(modifier = Modifier.height(4.dp))
+                    Text(
+                        text = job.company,
+                        style = MaterialTheme.typography.titleMedium,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+                }
+
+                Surface(
+                    shape = RoundedCornerShape(8.dp),
+                    color = MaterialTheme.colorScheme.primaryContainer,
+                    modifier = Modifier
+                        .padding(start = 8.dp)
+                        .clickable {  navController.navigate(Routes.homepage) },
+                ) {
+                    Text(
+                        text = "View Details",
+                        modifier = Modifier.padding(horizontal = 12.dp, vertical = 6.dp),
+                        style = MaterialTheme.typography.labelMedium,
+                        color = MaterialTheme.colorScheme.onPrimaryContainer
+                    )
+                }
+            }
+
+            Spacer(modifier = Modifier.height(12.dp))
+
+            Row(
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Icon(
+                    imageVector = Icons.Rounded.LocationOn,
+                    contentDescription = "Location",
+                    tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                    modifier = Modifier.size(16.dp)
+                )
+                Spacer(modifier = Modifier.width(4.dp))
+                Text(
+                    text = job.location,
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+            }
+
             Spacer(modifier = Modifier.height(8.dp))
-            Text(
-                text = "Application Deadline: ${job.applicationDeadline}",
-                fontSize = 14.sp,
-                color = Color.Gray
-            )
-            Spacer(modifier = Modifier.height(8.dp))
+
             Text(
                 text = job.description,
-                fontSize = 14.sp,
-                color = Color.Black,
+                style = MaterialTheme.typography.bodyMedium,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
                 maxLines = 3,
                 overflow = TextOverflow.Ellipsis
             )
-            Spacer(modifier = Modifier.height(4.dp))
-            Text(
-                text = "Posted by: ${job.postedBy}",
-                fontSize = 14.sp,
-                color = Color.Gray
-            )
-            Spacer(modifier = Modifier.height(8.dp))
-            Text(
-                text = "Posted on: ${job.datePosted}",
-                fontSize = 14.sp,
-                color = Color.Gray
-            )
+
+            Spacer(modifier = Modifier.height(12.dp))
+
+            HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant)
+
+            Spacer(modifier = Modifier.height(12.dp))
+
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween
+            ) {
+                Column {
+                    Text(
+                        text = "Posted by: ${job.postedBy}",
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+                    Text(
+                        text = "Posted on: ${job.datePosted}",
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+                }
+
+                Column(horizontalAlignment = Alignment.End) {
+                    Text(
+                        text = "Deadline",
+                        style = MaterialTheme.typography.labelSmall,
+                        color = MaterialTheme.colorScheme.primary
+                    )
+                    Text(
+                        text = job.applicationDeadline,
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+                }
+            }
         }
     }
 }

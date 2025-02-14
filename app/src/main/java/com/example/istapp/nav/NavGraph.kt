@@ -1,18 +1,10 @@
 package com.example.istapp.nav
 
 
-import androidx.compose.material3.DrawerValue
-import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.TopAppBarDefaults
-import androidx.compose.material3.rememberDrawerState
-import androidx.compose.material3.rememberTopAppBarState
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.rememberCoroutineScope
-import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
-import androidx.navigation.navArgument
 import com.example.istapp.AuthViewModel
 import com.example.istapp.screens.AnimatedSplashScreen
 import com.example.istapp.screens.ForgotPasswordScreen
@@ -24,7 +16,7 @@ import com.example.istapp.screens.SignupScreen
 import com.example.istapp.screens.VerificationEmailSentScreen
 import com.example.istapp.screens.ViewJobScreen
 
-@OptIn(ExperimentalMaterial3Api::class)
+
 @Composable
 fun NavGraph(authViewModel: AuthViewModel){
     val navController = rememberNavController() //Initializing navController
@@ -53,25 +45,10 @@ fun NavGraph(authViewModel: AuthViewModel){
         composable(Routes.postJob, content = {
             PostJobScreen(navController, authViewModel)
         })
-        composable(
-            route = Routes.viewJob,
-            arguments = listOf(navArgument("jobId") { type = NavType.StringType })
-        ) { backStackEntry ->
-            val jobId = backStackEntry.arguments?.getString("jobId") ?: return@composable
-            val drawerState = rememberDrawerState(initialValue = DrawerValue.Closed)
-            val scrollBehavior = TopAppBarDefaults.enterAlwaysScrollBehavior(state = rememberTopAppBarState())
-            val scope = rememberCoroutineScope()
-            val userRole = authViewModel.userRole.value ?: "user"
-            ViewJobScreen(
-                navController = navController,
-                jobId = jobId,
-                authViewModel = authViewModel,
-                drawerState = drawerState,
-                scrollBehavior = scrollBehavior,
-                scope = scope,
-                userRole = userRole
-            )
+        composable("viewJob/{jobId}") { backStackEntry ->
+            // Extract jobId from the backStackEntry arguments
+            val jobId = backStackEntry.arguments?.getString("jobId") ?: ""
+            ViewJobScreen(jobId = jobId, navController = navController)
         }
-
     })
 }
