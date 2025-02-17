@@ -98,6 +98,7 @@ fun JobsScreen(navController: NavHostController, authViewModel: AuthViewModel) {
 }
 
 data class Job(
+    val id: String = "",
     val title: String = "",
     val company: String = "",
     val location: String = "",
@@ -115,7 +116,9 @@ object FirestoreService {
     suspend fun getJobs(): List<Job> {
         return try {
             val snapshot = db.collection("jobs").get().await()
-            snapshot.documents.mapNotNull { it.toObject(Job::class.java) }
+            snapshot.documents.mapNotNull { document ->
+                document.toObject(Job::class.java)?.copy(id = document.id)
+            }
         } catch (e: Exception) {
             emptyList() // Handle errors gracefully
         }
@@ -218,16 +221,18 @@ fun JobCard(job: Job, navController: NavHostController) {
 
                 Surface(
                     shape = RoundedCornerShape(8.dp),
-                    color = MaterialTheme.colorScheme.primaryContainer,
+                    color = Color.Red,
                     modifier = Modifier
                         .padding(start = 8.dp)
-                        .clickable {  navController.navigate(Routes.homepage) },
+                        .clickable { 
+                            navController.navigate("viewJob/${job.id}") 
+                        },
                 ) {
                     Text(
                         text = "View Details",
                         modifier = Modifier.padding(horizontal = 12.dp, vertical = 6.dp),
                         style = MaterialTheme.typography.labelMedium,
-                        color = MaterialTheme.colorScheme.onPrimaryContainer
+                        color = Color.White
                     )
                 }
             }

@@ -18,6 +18,7 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.navigation.NavController
 import androidx.navigation.NavHostController
 import com.example.istapp.AuthViewModel
 import com.example.istapp.R
@@ -28,7 +29,7 @@ import com.google.firebase.auth.FirebaseAuth
 @Composable
 fun DrawerContent(
     modifier: Modifier = Modifier,
-    navController: NavHostController,
+    navController: NavController,
     authViewModel: AuthViewModel
 ) {
 

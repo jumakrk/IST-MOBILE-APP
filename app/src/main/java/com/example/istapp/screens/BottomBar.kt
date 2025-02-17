@@ -23,11 +23,11 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.unit.dp
-import androidx.navigation.NavHostController
+import androidx.navigation.NavController
 import com.example.istapp.nav.Routes
 
 @Composable
-fun BottomBar(navController: NavHostController) {
+fun BottomBar(navController: NavController) {
     // Determine selected index based on the current route
     val currentRoute = navController.currentBackStackEntry?.destination?.route
     val selectedIndex = bottomNavItems.indexOfFirst { it.route == currentRoute }

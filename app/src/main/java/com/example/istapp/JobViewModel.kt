@@ -17,13 +17,15 @@ class JobViewModel : ViewModel() {
     // Fetch job details
     fun getJobDetails(jobId: String): Flow<Job?> = flow {
         val document = firestore.collection("jobs").document(jobId).get().await()
-        emit(document.toObject(Job::class.java))
+        emit(document.toObject(Job::class.java)?.copy(id = document.id))
     }.flowOn(Dispatchers.IO)
 
     // Delete job
-    fun deleteJob(jobId: String) {
-        viewModelScope.launch {
+    suspend fun deleteJob(jobId: String) {
+        try {
             firestore.collection("jobs").document(jobId).delete().await()
+        } catch (e: Exception) {
+            throw Exception("Failed to delete job: ${e.message}")
         }
     }
 }
