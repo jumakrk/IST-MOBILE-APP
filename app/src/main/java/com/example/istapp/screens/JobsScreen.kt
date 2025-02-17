@@ -293,7 +293,7 @@ fun JobCard(job: Job, navController: NavHostController) {
                     Text(
                         text = "Deadline",
                         style = MaterialTheme.typography.labelSmall,
-                        color = MaterialTheme.colorScheme.primary
+                        color = Color.Black
                     )
                     Text(
                         text = job.applicationDeadline,
