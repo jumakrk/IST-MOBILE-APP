@@ -40,6 +40,11 @@ fun ViewJobScreen(jobId: String, navController: NavController, authViewModel: Au
     // Observe user role
     val userRole = authViewModel.userRole.observeAsState().value ?: "user"
 
+    // State for delete confirmation dialog
+    var showDeleteDialog by remember { mutableStateOf(false) }
+    // State for delete progress
+    var isDeleting by remember { mutableStateOf(false) }
+
     ModalNavigationDrawer(
         drawerState = drawerState,
         drawerContent = {
@@ -66,23 +71,7 @@ fun ViewJobScreen(jobId: String, navController: NavController, authViewModel: Au
                     actions = {
                         if (userRole == "admin") {
                             IconButton(
-                                onClick = {
-                                    scope.launch {
-                                        try {
-                                            viewModel.deleteJob(jobId)
-                                            Toast.makeText(context, "Job deleted successfully", Toast.LENGTH_SHORT).show()
-                                            navController.navigate(Routes.jobs) {
-                                                popUpTo(Routes.jobs) { inclusive = true }
-                                            }
-                                        } catch (e: Exception) {
-                                            Toast.makeText(
-                                                context,
-                                                "Error deleting job: ${e.message}",
-                                                Toast.LENGTH_LONG
-                                            ).show()
-                                        }
-                                    }
-                                }
+                                onClick = { showDeleteDialog = true }
                             ) {
                                 Icon(
                                     Icons.Default.Delete,
@@ -233,5 +222,68 @@ fun ViewJobScreen(jobId: String, navController: NavController, authViewModel: Au
                 }
             }
         }
+    }
+
+    // Delete confirmation dialog
+    if (showDeleteDialog) {
+        AlertDialog(
+            onDismissRequest = { 
+                if (!isDeleting) showDeleteDialog = false 
+            },
+            title = { Text("Delete Job") },
+            text = { 
+                if (isDeleting) {
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.spacedBy(8.dp)
+                    ) {
+                        CircularProgressIndicator(
+                            modifier = Modifier.size(24.dp),
+                            color = Color.Red
+                        )
+                        Text("Deleting job...")
+                    }
+                } else {
+                    Text("Are you sure you want to delete this job?")
+                }
+            },
+            confirmButton = {
+                TextButton(
+                    onClick = {
+                        if (!isDeleting) {
+                            isDeleting = true
+                            scope.launch {
+                                try {
+                                    viewModel.deleteJob(jobId)
+                                    Toast.makeText(context, "Job deleted successfully", Toast.LENGTH_SHORT).show()
+                                    showDeleteDialog = false
+                                    navController.navigate(Routes.jobs) {
+                                        popUpTo(Routes.jobs) { inclusive = true }
+                                    }
+                                } catch (e: Exception) {
+                                    Toast.makeText(
+                                        context,
+                                        "Error deleting job: ${e.message}",
+                                        Toast.LENGTH_LONG
+                                    ).show()
+                                    isDeleting = false
+                                }
+                            }
+                        }
+                    },
+                    enabled = !isDeleting
+                ) {
+                    Text("Delete", color = if (!isDeleting) Color.Red else Color.Gray)
+                }
+            },
+            dismissButton = {
+                TextButton(
+                    onClick = { showDeleteDialog = false },
+                    enabled = !isDeleting
+                ) {
+                    Text("Cancel", color = Color.Black)
+                }
+            }
+        )
     }
 }
