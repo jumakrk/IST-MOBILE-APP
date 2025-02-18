@@ -5,10 +5,13 @@ import android.widget.Toast
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
 import com.example.istapp.utilities.PreferencesManager
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.UserProfileChangeRequest
 import com.google.firebase.firestore.FirebaseFirestore
+import kotlinx.coroutines.launch
+import com.example.istapp.models.User
 
 // This AuthViewModel contains the logic for the authentication process
 class AuthViewModel : ViewModel() {
@@ -17,6 +20,10 @@ class AuthViewModel : ViewModel() {
     // LiveData to hold the user's role
     private val _userRole = MutableLiveData<String>()
     val userRole: LiveData<String> = _userRole
+
+    // Add these properties to the AuthViewModel class
+    private val _users = MutableLiveData<List<User>>()
+    val users: LiveData<List<User>> = _users
 
     init {
         val currentUser = FirebaseAuth.getInstance().currentUser
@@ -301,6 +308,30 @@ class AuthViewModel : ViewModel() {
             .addOnFailureListener {
                 _userRole.value = "user" // Default to "user" in case of an error
             }
+    }
+
+    // Add this function to fetch users
+    fun fetchUsers() {
+        viewModelScope.launch {
+            try {
+                val db = FirebaseFirestore.getInstance()
+                db.collection("users")
+                    .addSnapshotListener { snapshot, e ->
+                        if (e != null) {
+                            return@addSnapshotListener
+                        }
+
+                        if (snapshot != null) {
+                            val usersList = snapshot.documents.mapNotNull { doc ->
+                                doc.toObject(User::class.java)?.copy(uid = doc.id)
+                            }
+                            _users.value = usersList
+                        }
+                    }
+            } catch (e: Exception) {
+                // Handle error
+            }
+        }
     }
 }
 

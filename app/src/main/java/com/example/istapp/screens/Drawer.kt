@@ -19,7 +19,6 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
-import androidx.navigation.NavHostController
 import com.example.istapp.AuthViewModel
 import com.example.istapp.R
 import com.example.istapp.nav.Routes
@@ -82,7 +81,9 @@ fun DrawerContent(
             },
             label = { Text(text = "Admins", fontSize = 17.sp) },
             selected = false,
-            onClick = {}
+            onClick = {
+                navController.navigate("viewUsers/admin")
+            }
         )
 
         Spacer(modifier = Modifier.height(4.dp))
@@ -97,7 +98,9 @@ fun DrawerContent(
             },
             label = { Text(text = "Users", fontSize = 17.sp) },
             selected = false,
-            onClick = {}
+            onClick = {
+                navController.navigate("viewUsers/user")
+            }
         )
         }
 

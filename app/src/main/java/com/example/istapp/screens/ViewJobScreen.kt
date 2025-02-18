@@ -166,7 +166,7 @@ fun ViewJobScreen(jobId: String, navController: NavController, authViewModel: Au
                             fontWeight = FontWeight.Bold
                         )
                         
-                        Spacer(modifier = Modifier.height(8.dp))
+                    Spacer(modifier = Modifier.height(8.dp))
                         
                         Text(
                             text = "Posted by: ${job.postedBy}",
@@ -188,11 +188,11 @@ fun ViewJobScreen(jobId: String, navController: NavController, authViewModel: Au
                     }
 
                     item {
-                        // Apply Button
-                        Button(
+                    // Apply Button
+                    Button(
                             onClick = { /* Handle apply action */ },
-                            modifier = Modifier
-                                .fillMaxWidth()
+                        modifier = Modifier
+                            .fillMaxWidth()
                                 .height(50.dp)
                                 .padding(vertical = 8.dp),
                             enabled = !isDeadlinePassed,
@@ -281,7 +281,7 @@ fun ViewJobScreen(jobId: String, navController: NavController, authViewModel: Au
                     onClick = { showDeleteDialog = false },
                     enabled = !isDeleting
                 ) {
-                    Text("Cancel", color = Color.Black)
+                    Text("Cancel")
                 }
             }
         )

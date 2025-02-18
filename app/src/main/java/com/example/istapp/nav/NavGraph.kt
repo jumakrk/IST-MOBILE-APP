@@ -15,6 +15,7 @@ import com.example.istapp.screens.PostJobScreen
 import com.example.istapp.screens.SignupScreen
 import com.example.istapp.screens.VerificationEmailSentScreen
 import com.example.istapp.screens.ViewJobScreen
+import com.example.istapp.screens.ViewUsersScreen
 
 
 @Composable
@@ -49,6 +50,10 @@ fun NavGraph(authViewModel: AuthViewModel){
             // Extract jobId from the backStackEntry arguments
             val jobId = backStackEntry.arguments?.getString("jobId") ?: ""
             ViewJobScreen(jobId = jobId, navController = navController)
+        }
+        composable("viewUsers/{userType}") { backStackEntry ->
+            val userType = backStackEntry.arguments?.getString("userType") ?: "user"
+            ViewUsersScreen(navController, authViewModel, userType)
         }
     })
 }
