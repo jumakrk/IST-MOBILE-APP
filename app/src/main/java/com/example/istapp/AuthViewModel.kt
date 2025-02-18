@@ -12,6 +12,7 @@ import com.google.firebase.auth.UserProfileChangeRequest
 import com.google.firebase.firestore.FirebaseFirestore
 import kotlinx.coroutines.launch
 import com.example.istapp.models.User
+import kotlinx.coroutines.tasks.await
 
 // This AuthViewModel contains the logic for the authentication process
 class AuthViewModel : ViewModel() {
@@ -331,6 +332,30 @@ class AuthViewModel : ViewModel() {
             } catch (e: Exception) {
                 // Handle error
             }
+        }
+    }
+
+    // Add these functions to AuthViewModel
+
+    suspend fun deleteUser(uid: String) {
+        try {
+            val db = FirebaseFirestore.getInstance()
+            db.collection("users").document(uid)
+                .delete()
+                .await()
+        } catch (e: Exception) {
+            throw Exception("Failed to delete user: ${e.message}")
+        }
+    }
+
+    suspend fun changeUserRole(uid: String, newRole: String) {
+        try {
+            val db = FirebaseFirestore.getInstance()
+            db.collection("users").document(uid)
+                .update("role", newRole)
+                .await()
+        } catch (e: Exception) {
+            throw Exception("Failed to update user role: ${e.message}")
         }
     }
 }
