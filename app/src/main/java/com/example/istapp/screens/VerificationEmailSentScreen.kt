@@ -2,9 +2,11 @@ package com.example.istapp.screens
 
 import android.widget.Toast
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Text
 import androidx.compose.runtime.*
 import androidx.compose.runtime.livedata.observeAsState
@@ -14,6 +16,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
@@ -25,57 +28,50 @@ import kotlinx.coroutines.delay
 
 @Composable
 fun VerificationEmailSentScreen(navController: NavController, authViewModel: AuthViewModel) {
-
-    val buttonColors = ButtonDefaults.buttonColors(
-        containerColor = Color.Red,
-        contentColor = Color.White
-    )
-
-    val authState = authViewModel.authState.observeAsState()
     val context = LocalContext.current
+    val authState by authViewModel.authState.observeAsState()
+    var timerText by remember { mutableStateOf("") }
+    var canResend by remember { mutableStateOf(false) }
 
-    // State to manage button enable/disable and timer
-    var isButtonEnabled by remember { mutableStateOf(false) } // Initially disabled
-    var timerText by remember { mutableStateOf("Resend Email in 60 seconds") }
-
-    // Check the email verification status periodically
+    // Periodically check email verification status
     LaunchedEffect(Unit) {
         while (true) {
             authViewModel.checkEmailVerificationStatus()
-            delay(5000L) // Check if the user's email is verified every 5 seconds
+            delay(3000) // Check every 3 seconds
         }
     }
 
     // LaunchedEffect to react to state changes and navigate or show messages
-    LaunchedEffect(authState.value) {
-        when (val state = authState.value) {
+    LaunchedEffect(authState) {
+        when (val state = authState) {
             is AuthState.Authenticated -> {
-                // Navigate to the homepage if email is verified
-                Toast.makeText(context, "Email verified successfully", Toast.LENGTH_SHORT).show()
+                Toast.makeText(context, "Email verified successfully! Welcome!", Toast.LENGTH_SHORT).show()
                 navController.navigate(Routes.homepage) {
                     popUpTo(Routes.verificationEmailSent) { inclusive = true }
                 }
             }
+            is AuthState.Success -> {
+                Toast.makeText(context, state.message, Toast.LENGTH_LONG).show()
+            }
             is AuthState.Error -> {
-                // Show error message
-                Toast.makeText(context, state.message, Toast.LENGTH_SHORT).show()
+                Toast.makeText(context, state.message, Toast.LENGTH_LONG).show()
             }
             else -> Unit
         }
     }
 
-    // Timer logic for resend email button starts automatically on page load
+    // Timer logic for resend email button
     LaunchedEffect(Unit) {
         var countdown = 60
         while (countdown > 0) {
             timerText = "Resend Email in $countdown seconds"
+            canResend = false
             delay(1000L)
             countdown--
         }
-        isButtonEnabled = true
-        timerText = "You can resend the email again."
+        timerText = "Resend Verification Email"
+        canResend = true
     }
-
 
     Column(
         modifier = Modifier.fillMaxSize(),
@@ -96,49 +92,83 @@ fun VerificationEmailSentScreen(navController: NavController, authViewModel: Aut
             fontWeight = FontWeight.Bold
         )
 
-        Spacer(modifier = Modifier.height(4.dp))
-
-        Text(
-            text = "A verification email has been sent to your email.",
-            fontSize = 16.sp,
-            color = Color.Gray,
-        )
-
-        Spacer(modifier = Modifier.height(4.dp))
-
-        Text(
-            text = "Please check your inbox and verify your email.",
-            fontSize = 16.sp,
-            color = Color.Gray,
-        )
-
         Spacer(modifier = Modifier.height(16.dp))
 
-        Row {
-            Text(
-                text = "Didn't receive the email? ",
-                color = Color.Black,
-                fontWeight = FontWeight.Bold
-            )
-        }
-
-        Button(
-            onClick = {
-                if (isButtonEnabled) {
-                    authViewModel.resendVerificationEmail(context)
-                    isButtonEnabled = false // Disable button immediately after click
-                }
-            },
-            colors = buttonColors,
-            modifier = Modifier.width(150.dp),
-            enabled = isButtonEnabled // Button is enabled after countdown
-        ) {
-            Text(text = "Resend Email")
-        }
+        Text(
+            text = "A verification email has been sent to your email address.",
+            fontSize = 16.sp,
+            color = Color.Gray,
+            textAlign = TextAlign.Center,
+            modifier = Modifier.padding(horizontal = 32.dp)
+        )
 
         Spacer(modifier = Modifier.height(8.dp))
 
-        // Display the countdown timer text
-        Text(text = timerText, color = Color.Gray, fontSize = 14.sp)
+        Text(
+            text = "Please check your inbox and click the verification link.",
+            fontSize = 16.sp,
+            color = Color.Gray,
+            textAlign = TextAlign.Center,
+            modifier = Modifier.padding(horizontal = 32.dp)
+        )
+
+        Spacer(modifier = Modifier.height(24.dp))
+
+        Button(
+            onClick = {
+                if (canResend) {
+                    authViewModel.resendVerificationEmail()
+                }
+            },
+            enabled = canResend,
+            colors = ButtonDefaults.buttonColors(
+                containerColor = Color.Red,
+                contentColor = Color.White,
+                disabledContainerColor = Color.Gray
+            ),
+            modifier = Modifier.width(250.dp)
+        ) {
+            if (authState is AuthState.Loading) {
+                CircularProgressIndicator(
+                    modifier = Modifier.size(24.dp),
+                    color = Color.White
+                )
+            } else {
+                Text(text = timerText)
+            }
+        }
+
+        Spacer(modifier = Modifier.height(16.dp))
+
+        Row(
+            modifier = Modifier.padding(16.dp),
+            horizontalArrangement = Arrangement.Center,
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Text(
+                text = "Already verified? ",
+                color = Color.Gray
+            )
+            Text(
+                text = "Login here",
+                color = Color.Red,
+                fontWeight = FontWeight.Bold,
+                modifier = Modifier.clickable {
+                    navController.navigate(Routes.login) {
+                        popUpTo(Routes.verificationEmailSent) { inclusive = true }
+                    }
+                }
+            )
+        }
+
+        Spacer(modifier = Modifier.height(16.dp))
+
+        Text(
+            text = "Note: If you don't see the email, please check your spam folder.",
+            fontSize = 14.sp,
+            color = Color.Gray,
+            textAlign = TextAlign.Center,
+            modifier = Modifier.padding(horizontal = 32.dp)
+        )
     }
 }

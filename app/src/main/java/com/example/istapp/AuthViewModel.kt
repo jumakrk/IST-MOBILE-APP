@@ -43,9 +43,9 @@ class AuthViewModel : ViewModel() {
 
 
     // Login functionality
-    fun login(email: String, password: String, context: Context) {
+    fun login(email: String, password: String) {
         if (email.isEmpty() || password.isEmpty()) {
-            _authState.value = AuthState.Error("Email and password cannot be empty")
+            _authState.value = AuthState.Error("Please fill in all fields")
             return
         }
 
@@ -55,76 +55,102 @@ class AuthViewModel : ViewModel() {
             .addOnCompleteListener { task ->
                 if (task.isSuccessful) {
                     val currentUser = auth.currentUser
-                    // Checks the user's role during login
                     if (currentUser != null) {
-                        getUserRoleFromFirestore(currentUser.uid)
-                    }
-                    if (currentUser != null && currentUser.isEmailVerified) {
-                        _authState.value = AuthState.Authenticated
-                    } else {
-                        _authState.value = AuthState.Error("Your email is not verified. Please check your inbox and verify your email to continue.")
+                        if (!currentUser.isEmailVerified) {
+                            _authState.value = AuthState.Error("Please verify your email before logging in")
+                            auth.signOut() // Sign out if email isn't verified
+                            return@addOnCompleteListener
+                        }
+                        
+                        // Get user role and set it immediately
+                        val db = FirebaseFirestore.getInstance()
+                        db.collection("users").document(currentUser.uid).get()
+                            .addOnSuccessListener { document ->
+                                if (document != null && document.exists()) {
+                                    val role = document.getString("role") ?: "user"
+                                    _userRole.value = role
+                                    _authState.value = AuthState.Authenticated
+                                } else {
+                                    _userRole.value = "user"
+                                    _authState.value = AuthState.Error("User data not found")
+                                }
+                            }
+                            .addOnFailureListener {
+                                _authState.value = AuthState.Error("Failed to fetch user role: ${it.message}")
+                            }
                     }
                 } else {
-                    _authState.value = AuthState.Error(task.exception?.message ?: "Login failed. Please try again.")
-                    Toast.makeText(context, "Invalid email or password", Toast.LENGTH_SHORT).show()
+                    when (task.exception?.message) {
+                        "There is no user record corresponding to this identifier. The user may have been deleted." ->
+                            _authState.value = AuthState.Error("No account found with this email")
+                        "The password is invalid or the user does not have a password." ->
+                            _authState.value = AuthState.Error("Incorrect password")
+                        "A network error (such as timeout, interrupted connection or unreachable host) has occurred." ->
+                            _authState.value = AuthState.Error("Network error. Please check your internet connection")
+                        else ->
+                            _authState.value = AuthState.Error(task.exception?.message ?: "Login failed")
+                    }
                 }
-            }
-            .addOnFailureListener { exception ->
-                _authState.value = AuthState.Error(exception.message ?: "Login failed. Please try again.")
-                Toast.makeText(context, "Invalid email or password", Toast.LENGTH_SHORT).show()
             }
     }
 
     // Signup functionality with Username
-    fun signup(email: String, password: String, firstname: String, lastname: String, context: Context) {
+    fun signup(email: String, password: String, firstname: String, lastname: String) {
         if (email.isEmpty() || password.isEmpty() || firstname.isEmpty() || lastname.isEmpty()) {
-            _authState.value = AuthState.Error("Email, password, and username cannot be empty")
+            _authState.value = AuthState.Error("Please fill in all fields")
+            return
+        }
+
+        if (password.length < 6) {
+            _authState.value = AuthState.Error("Password must be at least 6 characters long")
             return
         }
 
         _authState.value = AuthState.Loading
 
-        // Create user with email and password
         auth.createUserWithEmailAndPassword(email, password)
             .addOnCompleteListener { task ->
                 if (task.isSuccessful) {
                     val user = auth.currentUser
                     user?.let {
-
-                        //Specified admin emails
                         val adminEmails = listOf("jumakrk@gmail.com")
-                        // Determine the user's role based on the email
                         val role = if (adminEmails.contains(email)) "admin" else "user"
+                        _userRole.value = role
 
-                        // Update user profile with username
                         val profileUpdates = UserProfileChangeRequest.Builder()
-                            .setDisplayName("$firstname $lastname") //converted concatenation to template
+                            .setDisplayName("$firstname $lastname")
                             .build()
-                        // Sign-in successful, save user details
-                        saveUserDetailsToFirestore( "$firstname $lastname", role)
 
                         it.updateProfile(profileUpdates)
-                            .addOnCompleteListener { profileUpdateTask ->
-                                if (profileUpdateTask.isSuccessful) {
-                                    // Send email verification
-                                    user.sendEmailVerification().addOnCompleteListener { verificationTask ->
-                                        if (verificationTask.isSuccessful) {
-                                            Toast.makeText(context, "A verification email has been sent. Please check your inbox.", Toast.LENGTH_SHORT).show()
-                                        } else {
-                                            Toast.makeText(context, "Failed to send verification email.", Toast.LENGTH_SHORT).show()
+                            .addOnCompleteListener { profileTask ->
+                                if (profileTask.isSuccessful) {
+                                    saveUserDetailsToFirestore(firstname, lastname, email, role)
+                                    
+                                    it.sendEmailVerification()
+                                        .addOnCompleteListener { emailTask ->
+                                            if (emailTask.isSuccessful) {
+                                                _authState.value = AuthState.Success("Account created! Please check your email for verification")
+                                            } else {
+                                                _authState.value = AuthState.Error("Account created but failed to send verification email: ${emailTask.exception?.message}")
+                                            }
                                         }
-                                    }
-                                } else {
-                                    _authState.value = AuthState.Error("Failed to update profile: ${profileUpdateTask.exception?.message}")
-                                }
+                            } else {
+                                _authState.value = AuthState.Error("Failed to update profile: ${profileTask.exception?.message}")
                             }
+                        }
                     }
                 } else {
-                    _authState.value = AuthState.Error(task.exception?.message ?: "Sign up failed. Please try again.")
+                    when (task.exception?.message) {
+                        "The email address is already in use by another account." ->
+                            _authState.value = AuthState.Error("This email is already registered")
+                        "The email address is badly formatted." ->
+                            _authState.value = AuthState.Error("Please enter a valid email address")
+                        "A network error (such as timeout, interrupted connection or unreachable host) has occurred." ->
+                            _authState.value = AuthState.Error("Network error. Please check your internet connection")
+                        else ->
+                            _authState.value = AuthState.Error(task.exception?.message ?: "Failed to create account")
+                    }
                 }
-            }
-            .addOnFailureListener { exception ->
-                _authState.value = AuthState.Error(exception.message ?: "Sign up failed. Please try again.")
             }
     }
 
@@ -144,7 +170,7 @@ class AuthViewModel : ViewModel() {
 
     fun resetPassword(email: String) {
         if (email.isEmpty()) {
-            _authState.value = AuthState.Error("Email cannot be empty")
+            _authState.value = AuthState.Error("Please enter your email address")
             return
         }
 
@@ -153,36 +179,50 @@ class AuthViewModel : ViewModel() {
         auth.sendPasswordResetEmail(email)
             .addOnCompleteListener { task ->
                 if (task.isSuccessful) {
-                    _authState.value = AuthState.Success("A password reset email has been sent to $email. Please check your inbox.")
+                    _authState.value = AuthState.Success("Password reset email sent to $email")
                 } else {
-                    _authState.value = AuthState.Error(task.exception?.message ?: "Failed to send password reset email. Please try again.")
+                    when (task.exception?.message) {
+                        "There is no user record corresponding to this identifier. The user may have been deleted." ->
+                            _authState.value = AuthState.Error("No account found with this email")
+                        "The email address is badly formatted." ->
+                            _authState.value = AuthState.Error("Please enter a valid email address")
+                        "A network error (such as timeout, interrupted connection or unreachable host) has occurred." ->
+                            _authState.value = AuthState.Error("Network error. Please check your internet connection")
+                        else ->
+                            _authState.value = AuthState.Error(task.exception?.message ?: "Failed to send reset email")
+                    }
                 }
-            }
-            .addOnFailureListener { exception ->
-                _authState.value = AuthState.Error(exception.message ?: "Failed to send password reset email. Please try again.")
             }
     }
 
     // Resend verification email functionality
-    fun resendVerificationEmail(context: Context) {
+    fun resendVerificationEmail() {
         val currentUser = auth.currentUser
-        if (currentUser != null && !currentUser.isEmailVerified) {
-            _authState.value = AuthState.Loading
+        if (currentUser == null) {
+            _authState.value = AuthState.Error("No user is currently signed in")
+            return
+        }
 
-            currentUser.sendEmailVerification()
-                .addOnCompleteListener { task ->
-                    if (task.isSuccessful) {
-                        Toast.makeText(context, "A new verification email has been sent. Please check your inbox.", Toast.LENGTH_SHORT).show()
-                    } else {
-                        Toast.makeText(context, "Failed to send verification email.", Toast.LENGTH_SHORT).show()
+        if (currentUser.isEmailVerified) {
+            _authState.value = AuthState.Error("Email is already verified")
+            return
+        }
+
+        _authState.value = AuthState.Loading
+
+        currentUser.sendEmailVerification()
+            .addOnCompleteListener { task ->
+                if (task.isSuccessful) {
+                    _authState.value = AuthState.Success("Verification email sent. Please check your inbox")
+                } else {
+                    when (task.exception?.message) {
+                        "A network error (such as timeout, interrupted connection or unreachable host) has occurred." ->
+                            _authState.value = AuthState.Error("Network error. Please check your internet connection")
+                        else ->
+                            _authState.value = AuthState.Error(task.exception?.message ?: "Failed to send verification email")
                     }
                 }
-                .addOnFailureListener { exception ->
-                    _authState.value = AuthState.Error(exception.message ?: "Failed to resend verification email. Please try again.")
-                }
-        } else {
-            _authState.value = AuthState.Error("No authenticated user found or email is already verified.")
-        }
+            }
     }
 
     // Check email verification status
@@ -192,12 +232,28 @@ class AuthViewModel : ViewModel() {
             currentUser.reload().addOnCompleteListener { task ->
                 if (task.isSuccessful) {
                     if (currentUser.isEmailVerified) {
-                        _authState.value = AuthState.Authenticated // Update the state to authenticated once the email is verified
+                        // Get user role and set it immediately after verification
+                        val db = FirebaseFirestore.getInstance()
+                        db.collection("users").document(currentUser.uid).get()
+                            .addOnSuccessListener { document ->
+                                if (document != null && document.exists()) {
+                                    val role = document.getString("role") ?: "user"
+                                    _userRole.value = role
+                                    _authState.value = AuthState.Authenticated
+                                } else {
+                                    _userRole.value = "user"
+                                    _authState.value = AuthState.Authenticated
+                                }
+                            }
+                            .addOnFailureListener {
+                                _userRole.value = "user"
+                                _authState.value = AuthState.Authenticated
+                            }
                     } else {
-                        _authState.value = AuthState.UnAuthenticated // Still unverified
+                        _authState.value = AuthState.UnAuthenticated
                     }
                 } else {
-                    _authState.value = AuthState.Error("Failed to check email verification status.")
+                    _authState.value = AuthState.Error("Failed to check email verification status")
                 }
             }
         } else {
@@ -205,30 +261,26 @@ class AuthViewModel : ViewModel() {
         }
     }
 
-    private fun saveUserDetailsToFirestore(username: String, role: String ) {
-        val user = FirebaseAuth.getInstance().currentUser
+    private fun saveUserDetailsToFirestore(firstname: String, lastname: String, email: String, role: String) {
+        val user = auth.currentUser
         val db = FirebaseFirestore.getInstance()
 
         user?.let {
-            // Create a user map to store user details
-            val firstname = it.displayName?.substringBefore(" ")
-            val lastname = it.displayName?.substringAfter(" ")
             val userDetails = hashMapOf(
                 "uid" to it.uid,
-                "$firstname $lastname" to username,
-                "email" to it.email,
+                "username" to "$firstname $lastname",  // Store full name as username
+                "firstname" to firstname,              // Store firstname separately
+                "lastname" to lastname,                // Store lastname separately
+                "email" to email,
                 "role" to role
             )
 
-            // Save user details in the "users" collection with the document ID as the user UID
             db.collection("users").document(it.uid)
                 .set(userDetails)
                 .addOnSuccessListener {
-                    // Success handling
                     println("User details saved successfully")
                 }
                 .addOnFailureListener { e ->
-                    // Failure handling
                     println("Error saving user details: ${e.message}")
                 }
         }
@@ -260,3 +312,4 @@ sealed class AuthState {
     data class Success(val message: String) : AuthState()
     data class Error(val message: String) : AuthState()
 }
+
