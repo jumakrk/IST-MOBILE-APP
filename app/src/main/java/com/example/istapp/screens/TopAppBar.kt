@@ -19,12 +19,12 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.navigation.NavHostController
+import androidx.navigation.NavController
 import com.example.istapp.nav.Routes
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun TopBar(navController: NavHostController, modifier: Modifier = Modifier, scrollBehavior: TopAppBarScrollBehavior, onOpenDrawer: () -> Unit) {
+fun TopBar(navController: NavController, modifier: Modifier = Modifier, scrollBehavior: TopAppBarScrollBehavior, onOpenDrawer: () -> Unit) {
     val currentRoute = navController.currentBackStackEntry?.destination?.route
     // TopAppBar with title, navigation icon, and action icons
     TopAppBar(

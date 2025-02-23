@@ -6,22 +6,20 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Menu
-import androidx.compose.material.icons.filled.Person
+import androidx.compose.material.icons.filled.Edit
+import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
-import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import com.example.istapp.AuthViewModel
 import com.example.istapp.models.User
+import com.google.firebase.firestore.FirebaseFirestore
 import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -31,23 +29,32 @@ fun ViewUsersScreen(
     authViewModel: AuthViewModel,
     userType: String
 ) {
-    val context = LocalContext.current
-    val scope = rememberCoroutineScope()
-    val drawerState = rememberDrawerState(initialValue = DrawerValue.Closed)
-    val users by authViewModel.users.observeAsState(emptyList())
-    
-    // States for role change dialog
-    var showRoleChangeDialog by remember { mutableStateOf(false) }
+    var users by remember { mutableStateOf<List<User>>(emptyList()) }
+    var searchQuery by remember { mutableStateOf("") }
+    var showDialog by remember { mutableStateOf(false) }
     var selectedUser by remember { mutableStateOf<User?>(null) }
-    var isChangingRole by remember { mutableStateOf(false) }
+    val context = LocalContext.current
+    val scrollBehavior = TopAppBarDefaults.enterAlwaysScrollBehavior(rememberTopAppBarState())
+    val drawerState = rememberDrawerState(initialValue = DrawerValue.Closed)
+    val scope = rememberCoroutineScope()
 
-    // Fetch users when the screen is created
-    LaunchedEffect(Unit) {
-        authViewModel.fetchUsers()
+    // Fetch users
+    LaunchedEffect(userType) {
+        val db = FirebaseFirestore.getInstance()
+        db.collection("users")
+            .get()
+            .addOnSuccessListener { documents ->
+                users = documents.mapNotNull { it.toObject(User::class.java) }
+                    .sortedBy { it.username.lowercase() }
+            }
     }
 
-    // Filter users based on userType
-    val filteredUsers = users.filter { it.role == userType }
+    // Filter users based on search query and userType
+    val filteredUsers = users.filter { user ->
+        (user.role == userType) && 
+        (user.username.contains(searchQuery, ignoreCase = true) ||
+         user.email.contains(searchQuery, ignoreCase = true))
+    }
 
     ModalNavigationDrawer(
         drawerState = drawerState,
@@ -59,229 +66,181 @@ fun ViewUsersScreen(
     ) {
         Scaffold(
             topBar = {
-                TopAppBar(
-                    title = { 
-                        Text(
-                            text = if (userType == "admin") "Administrators" else "Regular Users",
-                            color = Color.White,
-                            fontWeight = FontWeight.Bold
-                        ) 
-                    },
-                    navigationIcon = {
-                        IconButton(onClick = { scope.launch { drawerState.open() } }) {
-                            Icon(
-                                Icons.Default.Menu,
-                                contentDescription = "Menu",
-                                tint = Color.White
-                            )
-                        }
-                    },
-                    colors = TopAppBarDefaults.topAppBarColors(
-                        containerColor = Color.Red,
-                        titleContentColor = Color.White,
-                        navigationIconContentColor = Color.White
-                    )
+                TopBar(
+                    navController = navController,
+                    scrollBehavior = scrollBehavior,
+                    onOpenDrawer = { scope.launch { drawerState.open() } }
                 )
             },
             bottomBar = {
                 BottomBar(navController = navController)
             }
         ) { paddingValues ->
-            if (users.isEmpty()) {
-                Box(
+            Column(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(paddingValues)
+                    .padding(16.dp)
+            ) {
+                // Updated Search TextField
+                OutlinedTextField(
+                    value = searchQuery,
+                    onValueChange = { searchQuery = it },
                     modifier = Modifier
-                        .fillMaxSize()
-                        .padding(paddingValues),
-                    contentAlignment = Alignment.Center
-                ) {
-                    CircularProgressIndicator(color = Color.Red)
-                }
-            } else if (filteredUsers.isEmpty()) {
-                Box(
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .padding(paddingValues),
-                    contentAlignment = Alignment.Center
-                ) {
-                    Column(
-                        horizontalAlignment = Alignment.CenterHorizontally,
-                        verticalArrangement = Arrangement.Center
-                    ) {
+                        .padding(bottom = 16.dp)
+                        .fillMaxWidth()
+                        .align(Alignment.CenterHorizontally),
+                    placeholder = { Text("Search by name or email") },
+                    leadingIcon = {
                         Icon(
-                            imageVector = Icons.Default.Person,
-                            contentDescription = null,
-                            modifier = Modifier.size(48.dp),
+                            imageVector = Icons.Default.Search,
+                            contentDescription = "Search",
                             tint = Color.Gray
                         )
-                        Spacer(modifier = Modifier.height(16.dp))
-                        Text(
-                            text = "No ${if (userType == "admin") "administrators" else "regular users"} found",
-                            style = MaterialTheme.typography.bodyLarge,
-                            color = Color.Gray
-                        )
-                    }
+                    },
+                    colors = OutlinedTextFieldDefaults.colors(
+                        focusedBorderColor = Color.Red,
+                        unfocusedBorderColor = Color.Gray,
+                        focusedLeadingIconColor = Color.Red,
+                        unfocusedLeadingIconColor = Color.Gray,
+                        cursorColor = Color.Red // Add red cursor
+                    ),
+                    shape = RoundedCornerShape(12.dp), // Add rounded corners
+                    singleLine = true
+                )
+
+                // Updated Header Row (removed Role column)
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceBetween
+                ) {
+                    Text(
+                        text = "Username",
+                        style = MaterialTheme.typography.titleSmall,
+                        modifier = Modifier.weight(1f),
+                        fontWeight = FontWeight.Bold
+                    )
+                    Text(
+                        text = "Email",
+                        style = MaterialTheme.typography.titleSmall,
+                        modifier = Modifier.weight(2f), // Increased weight for email
+                        fontWeight = FontWeight.Bold
+                    )
+                    Spacer(modifier = Modifier.weight(0.5f))
                 }
-            } else {
+
+                HorizontalDivider(modifier = Modifier.padding(vertical = 8.dp))
+
+                // Updated Users List (removed Role column)
                 LazyColumn(
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .padding(paddingValues)
-                        .padding(horizontal = 16.dp),
-                    verticalArrangement = Arrangement.spacedBy(12.dp),
-                    contentPadding = PaddingValues(vertical = 16.dp)
+                    verticalArrangement = Arrangement.spacedBy(8.dp)
                 ) {
                     items(filteredUsers) { user ->
-                        UserCard(
-                            user = user,
-                            onRoleChangeClick = {
-                                selectedUser = user
-                                showRoleChangeDialog = true
+                        Row(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(vertical = 8.dp),
+                            horizontalArrangement = Arrangement.SpaceBetween,
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            Text(
+                                text = user.username,
+                                style = MaterialTheme.typography.bodyMedium,
+                                modifier = Modifier.weight(1f)
+                            )
+                            Text(
+                                text = user.email,
+                                style = MaterialTheme.typography.bodyMedium,
+                                modifier = Modifier.weight(2f) // Increased weight for email
+                            )
+                            IconButton(
+                                onClick = {
+                                    selectedUser = user
+                                    showDialog = true
+                                },
+                                modifier = Modifier.weight(0.5f)
+                            ) {
+                                Icon(
+                                    imageVector = Icons.Default.Edit,
+                                    contentDescription = "Change Role",
+                                    tint = Color.Red
+                                )
                             }
-                        )
+                        }
+                        HorizontalDivider()
                     }
                 }
             }
 
-            // Role change dialog
-            if (showRoleChangeDialog) {
+            // Confirmation Dialog
+            if (showDialog && selectedUser != null) {
                 AlertDialog(
-                    onDismissRequest = { if (!isChangingRole) showRoleChangeDialog = false },
-                    title = { Text("Change User Role") },
-                    text = { 
-                        if (isChangingRole) {
-                            Row(
-                                verticalAlignment = Alignment.CenterVertically,
-                                horizontalArrangement = Arrangement.spacedBy(8.dp)
-                            ) {
-                                CircularProgressIndicator(
-                                    modifier = Modifier.size(24.dp),
-                                    color = Color.Red
-                                )
-                                Text("Changing role...")
-                            }
-                        } else {
-                            Column {
-                                Text("Are you sure you want to change")
-                                Text(
-                                    text = selectedUser?.username ?: "",
-                                    fontWeight = FontWeight.Bold
-                                )
-                                Text("from ${selectedUser?.role} to ${if (selectedUser?.role == "admin") "user" else "admin"}?")
-                            }
-                        }
+                    onDismissRequest = { showDialog = false },
+                    title = {
+                        Text(
+                            text = "Change User Role",
+                            style = MaterialTheme.typography.titleLarge,
+                            fontWeight = FontWeight.Bold
+                        )
+                    },
+                    text = {
+                        Text(
+                            text = "Are you sure you want to change ${selectedUser?.username}'s role from ${selectedUser?.role} to ${if (selectedUser?.role == "user") "admin" else "user"}?",
+                            style = MaterialTheme.typography.bodyLarge
+                        )
                     },
                     confirmButton = {
-                        Button(
+                        TextButton(
                             onClick = {
                                 selectedUser?.let { user ->
-                                    isChangingRole = true
-                                    scope.launch {
-                                        try {
-                                            val newRole = if (user.role == "admin") "user" else "admin"
-                                            authViewModel.changeUserRole(user.uid, newRole)
-                                            showRoleChangeDialog = false
-                                            Toast.makeText(context, "Role updated successfully", Toast.LENGTH_SHORT).show()
-                                        } catch (e: Exception) {
-                                            Toast.makeText(context, e.message, Toast.LENGTH_LONG).show()
-                                        } finally {
-                                            isChangingRole = false
+                                    val newRole = if (user.role == "user") "admin" else "user"
+                                    val db = FirebaseFirestore.getInstance()
+                                    db.collection("users").document(user.uid)
+                                        .update("role", newRole)
+                                        .addOnSuccessListener {
+                                            Toast.makeText(
+                                                context,
+                                                "Role updated successfully",
+                                                Toast.LENGTH_SHORT
+                                            ).show()
+                                            // Refresh the users list
+                                            db.collection("users")
+                                                .get()
+                                                .addOnSuccessListener { documents ->
+                                                    users = documents.mapNotNull { 
+                                                        it.toObject(User::class.java) 
+                                                    }.sortedBy { it.username.lowercase() }
+                                                }
                                         }
-                                    }
+                                        .addOnFailureListener {
+                                            Toast.makeText(
+                                                context,
+                                                "Failed to update role",
+                                                Toast.LENGTH_SHORT
+                                            ).show()
+                                        }
                                 }
-                            },
-                            enabled = !isChangingRole,
-                            colors = ButtonDefaults.buttonColors(
-                                containerColor = Color.Red
-                            )
+                                showDialog = false
+                            }
                         ) {
-                            Text("Change Role")
+                            Text(
+                                text = "Yes",
+                                color = Color.Red,
+                                fontWeight = FontWeight.Bold
+                            )
                         }
                     },
                     dismissButton = {
-                        OutlinedButton(
-                            onClick = { showRoleChangeDialog = false },
-                            enabled = !isChangingRole
-                        ) {
-                            Text("Cancel")
+                        TextButton(onClick = { showDialog = false }) {
+                            Text(
+                                text = "No",
+                                color = Color.Gray,
+                                fontWeight = FontWeight.Bold
+                            )
                         }
-                    }
-                )
-            }
-        }
-    }
-}
-
-@Composable
-fun UserCard(
-    user: User,
-    onRoleChangeClick: () -> Unit
-) {
-    Card(
-        modifier = Modifier
-            .fillMaxWidth()
-            .clip(RoundedCornerShape(12.dp)),
-        colors = CardDefaults.cardColors(
-            containerColor = MaterialTheme.colorScheme.surface
-        ),
-        elevation = CardDefaults.cardElevation(
-            defaultElevation = 2.dp
-        )
-    ) {
-        Row(
-            modifier = Modifier
-                .padding(16.dp)
-                .fillMaxWidth(),
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            Surface(
-                modifier = Modifier.size(48.dp),
-                shape = RoundedCornerShape(24.dp),
-                color = Color.Red.copy(alpha = 0.1f)
-            ) {
-                Box(
-                    contentAlignment = Alignment.Center
-                ) {
-                    Icon(
-                        imageVector = Icons.Default.Person,
-                        contentDescription = null,
-                        tint = Color.Red,
-                        modifier = Modifier.size(24.dp)
-                    )
-                }
-            }
-            
-            Spacer(modifier = Modifier.width(16.dp))
-            
-            Column(
-                modifier = Modifier.weight(1f)
-            ) {
-                Text(
-                    text = user.username,
-                    style = MaterialTheme.typography.titleMedium,
-                    fontWeight = FontWeight.Bold,
-                    maxLines = 1,
-                    overflow = TextOverflow.Ellipsis
-                )
-                Spacer(modifier = Modifier.height(4.dp))
-                Text(
-                    text = user.email,
-                    style = MaterialTheme.typography.bodyMedium,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                    maxLines = 1,
-                    overflow = TextOverflow.Ellipsis
-                )
-            }
-            
-            FilledTonalButton(
-                onClick = onRoleChangeClick,
-                colors = ButtonDefaults.filledTonalButtonColors(
-                    containerColor = Color.Red.copy(alpha = 0.1f),
-                    contentColor = Color.Red
-                )
-            ) {
-                Text(
-                    text = if (user.role == "admin") "Make User" else "Make Admin",
-                    style = MaterialTheme.typography.labelMedium
+                    },
+                    containerColor = MaterialTheme.colorScheme.surface,
+                    tonalElevation = 8.dp
                 )
             }
         }
