@@ -20,6 +20,7 @@ import androidx.compose.ui.unit.dp
 import androidx.navigation.NavHostController
 import com.example.istapp.AuthState
 import com.example.istapp.AuthViewModel
+import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
 import kotlinx.coroutines.launch
 import java.text.SimpleDateFormat
@@ -69,6 +70,23 @@ fun PostJobForm(paddingValues: PaddingValues) {
     var isCyberSecurity by remember { mutableStateOf(false) }
     val context = LocalContext.current
     var isLoading by remember { mutableStateOf(false) }
+
+    // Get current user
+    val currentUser = FirebaseAuth.getInstance().currentUser
+
+    // Fetch username from Firestore when the component is first created
+    LaunchedEffect(currentUser) {
+        if (currentUser != null) {
+            val db = FirebaseFirestore.getInstance()
+            db.collection("users").document(currentUser.uid)
+                .get()
+                .addOnSuccessListener { document ->
+                    if (document != null && document.exists()) {
+                        postedBy = document.getString("username") ?: ""
+                    }
+                }
+        }
+    }
 
     // Firestore instance
     val db = FirebaseFirestore.getInstance()
@@ -258,7 +276,7 @@ fun PostJobForm(paddingValues: PaddingValues) {
         item {
         OutlinedTextField(
             value = postedBy,
-            onValueChange = { postedBy = it },
+            onValueChange = { /* Read only */ },
             label = {
                 Text(
                     text = "Posted By",
@@ -276,6 +294,7 @@ fun PostJobForm(paddingValues: PaddingValues) {
                 .focusRequester(focusRequester)
                 .onFocusChanged { focusState -> postedByIsFocused = focusState.isFocused }
                 .fillMaxWidth(),
+            readOnly = true // Make the field read-only
         )
         }
 
