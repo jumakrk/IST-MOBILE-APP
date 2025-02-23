@@ -12,4 +12,5 @@ object Routes {
     var jobs = "jobs"
     var postJob = "postJob"
     var viewJob = "view_job/{jobId}"
+    var viewUsers = "viewUsers/{userType}"
 }
