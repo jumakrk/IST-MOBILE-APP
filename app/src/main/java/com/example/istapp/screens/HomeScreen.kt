@@ -48,8 +48,13 @@ fun HomeScreen(navController: NavHostController, authViewModel: AuthViewModel) {
     ModalNavigationDrawer(
         drawerState = drawerState,
         drawerContent = {
-            ModalDrawerSheet(modifier = Modifier.width(250.dp)) { // Set the width of the drawer
-                DrawerContent(modifier = Modifier , navController = navController, authViewModel = authViewModel)
+            ModalDrawerSheet(modifier = Modifier.width(250.dp)) {
+                DrawerContent(
+                    modifier = Modifier,
+                    navController = navController,
+                    authViewModel = authViewModel,
+                    onCloseDrawer = { scope.launch { drawerState.close() } }
+                )
             }
         }
     ) {

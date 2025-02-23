@@ -64,7 +64,8 @@ fun ViewUsersScreen(
                 DrawerContent(
                     modifier = Modifier,
                     navController = navController,
-                    authViewModel = authViewModel
+                    authViewModel = authViewModel,
+                    onCloseDrawer = { scope.launch { drawerState.close() } }
                 )
             }
         }

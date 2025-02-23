@@ -49,7 +49,7 @@ fun ViewJobScreen(jobId: String, navController: NavController, authViewModel: Au
         drawerState = drawerState,
         drawerContent = {
             ModalDrawerSheet(modifier = Modifier.width(250.dp)) {
-                DrawerContent(modifier = Modifier, navController = navController, authViewModel = authViewModel)
+                DrawerContent(modifier = Modifier, navController = navController, authViewModel = authViewModel, onCloseDrawer = { scope.launch { drawerState.close() } })
             }
         }
     ) {
