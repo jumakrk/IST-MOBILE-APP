@@ -58,9 +58,14 @@ fun ViewUsersScreen(
 
     ModalNavigationDrawer(
         drawerState = drawerState,
+        gesturesEnabled = false,
         drawerContent = {
             ModalDrawerSheet(modifier = Modifier.width(250.dp)) {
-                DrawerContent(modifier = Modifier, navController = navController, authViewModel = authViewModel)
+                DrawerContent(
+                    modifier = Modifier,
+                    navController = navController,
+                    authViewModel = authViewModel
+                )
             }
         }
     ) {
@@ -73,7 +78,12 @@ fun ViewUsersScreen(
                 )
             },
             bottomBar = {
-                BottomBar(navController = navController)
+                BottomBar(
+                    navController = navController,
+                    onNavigate = { 
+                        scope.launch { drawerState.close() }
+                    }
+                )
             }
         ) { paddingValues ->
             Column(

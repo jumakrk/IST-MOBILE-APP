@@ -27,7 +27,10 @@ import androidx.navigation.NavController
 import com.example.istapp.nav.Routes
 
 @Composable
-fun BottomBar(navController: NavController) {
+fun BottomBar(
+    navController: NavController,
+    onNavigate: () -> Unit = {} // Add default value for backward compatibility
+) {
     // Determine selected index based on the current route
     val currentRoute = navController.currentBackStackEntry?.destination?.route
     val selectedIndex = bottomNavItems.indexOfFirst { it.route == currentRoute }
@@ -35,10 +38,8 @@ fun BottomBar(navController: NavController) {
     // Selected item state
     var selected by remember { mutableIntStateOf(selectedIndex.takeIf { it != -1 } ?: 0) }
 
-    // BottomBar content
     Box(
-        modifier = Modifier
-            .height(85.dp)
+        modifier = Modifier.height(85.dp)
     ) {
         NavigationBar(
             containerColor = Color.Red,
@@ -47,16 +48,19 @@ fun BottomBar(navController: NavController) {
                 NavigationBarItem(
                     selected = index == selected,
                     onClick = {
-                        if (selected != index) { // Only navigate if the clicked index is different
+                        onNavigate() // Call onNavigate before navigation
+                        if (selected != index) {
                             selected = index
                             navController.navigate(bottomNavItem.route) {
-                                // Prevent multiple copies of the same destination
+                                popUpTo(Routes.homepage) // Pop up to homepage
                                 launchSingleTop = true
-                                restoreState = true
                             }
-                        } else{
-                            if (index == 0) { // Home icon clicked while already selected
-                                navController.popBackStack(Routes.homepage, false)
+                        } else if (index == 0) {
+                            // If home is already selected, pop back to homepage
+                            navController.navigate(Routes.homepage) {
+                                popUpTo(Routes.homepage) {
+                                    inclusive = true
+                                }
                             }
                         }
                     },
