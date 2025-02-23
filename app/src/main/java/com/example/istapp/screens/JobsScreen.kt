@@ -225,7 +225,7 @@ fun JobCard(job: Job, navController: NavHostController) {
                     modifier = Modifier
                         .padding(start = 8.dp)
                         .clickable { 
-                            navController.navigate("viewJob/${job.id}") 
+                            navController.navigate(Routes.viewJob.replace("{jobId}", job.id))
                         },
                 ) {
                     Text(

@@ -56,7 +56,11 @@ fun NavGraph(authViewModel: AuthViewModel) {
         
         composable(Routes.viewJob) { backStackEntry ->
             val jobId = backStackEntry.arguments?.getString("jobId") ?: ""
-            ViewJobScreen(jobId = jobId, navController = navController)
+            ViewJobScreen(
+                jobId = jobId, 
+                navController = navController,
+                authViewModel = authViewModel
+            )
         }
         
         // User management routes

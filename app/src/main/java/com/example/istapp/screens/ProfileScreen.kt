@@ -6,6 +6,7 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Email
+import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.rounded.AdminPanelSettings
 import androidx.compose.material3.*
@@ -129,17 +130,24 @@ fun ProfileScreen(
                         
                         Spacer(modifier = Modifier.height(8.dp))
                         
-                        Card(
-                            colors = CardDefaults.cardColors(
-                                containerColor = Color.Red
+                        // Edit button instead of role card
+                        FilledTonalButton(
+                            onClick = { /* TODO: Implement edit functionality */ },
+                            colors = ButtonDefaults.filledTonalButtonColors(
+                                containerColor = Color.Red.copy(alpha = 0.1f),
+                                contentColor = Color.Red
                             ),
-                            shape = RoundedCornerShape(16.dp)
+                            shape = RoundedCornerShape(8.dp)
                         ) {
+                            Icon(
+                                imageVector = Icons.Default.Edit,
+                                contentDescription = "Edit Profile",
+                                modifier = Modifier.size(16.dp)
+                            )
+                            Spacer(modifier = Modifier.width(4.dp))
                             Text(
-                                text = role.uppercase(),
-                                color = Color.White,
-                                modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp),
-                                fontWeight = FontWeight.Bold
+                                text = "Edit Profile",
+                                fontWeight = FontWeight.Medium
                             )
                         }
                     }
