@@ -1,5 +1,6 @@
 package com.example.istapp.screens
 
+import android.widget.Toast
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.CircleShape
@@ -7,14 +8,15 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Email
 import androidx.compose.material.icons.filled.Edit
+import androidx.compose.material.icons.filled.Lock
 import androidx.compose.material.icons.filled.Person
-import androidx.compose.material.icons.rounded.AdminPanelSettings
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -23,7 +25,6 @@ import com.example.istapp.AuthViewModel
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
 import kotlinx.coroutines.launch
-import java.util.Locale
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -34,6 +35,8 @@ fun ProfileScreen(
     var username by remember { mutableStateOf("") }
     var email by remember { mutableStateOf("") }
     var role by remember { mutableStateOf("") }
+    var showResetDialog by remember { mutableStateOf(false) }
+    val context = LocalContext.current
     
     val scrollBehavior = TopAppBarDefaults.enterAlwaysScrollBehavior(rememberTopAppBarState())
     val drawerState = rememberDrawerState(initialValue = DrawerValue.Closed)
@@ -229,7 +232,7 @@ fun ProfileScreen(
 
                         Spacer(modifier = Modifier.height(16.dp))
 
-                        // Role Row
+                        // Password Row
                         Row(
                             modifier = Modifier
                                 .fillMaxWidth()
@@ -237,30 +240,84 @@ fun ProfileScreen(
                             verticalAlignment = Alignment.CenterVertically
                         ) {
                             Icon(
-                                imageVector = Icons.Rounded.AdminPanelSettings,
-                                contentDescription = "Role",
+                                imageVector = Icons.Default.Lock,
+                                contentDescription = "Password",
                                 tint = Color.Red
                             )
                             Spacer(modifier = Modifier.width(16.dp))
-                            Column {
+                            Column(
+                                modifier = Modifier.weight(1f)
+                            ) {
                                 Text(
-                                    text = "Role",
+                                    text = "Password",
                                     fontSize = 14.sp,
                                     color = Color.Gray
                                 )
                                 Text(
-                                    text = role.replaceFirstChar {
-                                        if (it.isLowerCase()) it.titlecase(
-                                            Locale.ROOT
-                                        ) else it.toString()
-                                    },
+                                    text = "••••••••",
                                     fontSize = 16.sp,
+                                    fontWeight = FontWeight.Medium
+                                )
+                            }
+                            TextButton(
+                                onClick = { showResetDialog = true },
+                                colors = ButtonDefaults.textButtonColors(
+                                    contentColor = Color.Red
+                                )
+                            ) {
+                                Text(
+                                    text = "Change Password",
                                     fontWeight = FontWeight.Medium
                                 )
                             }
                         }
                     }
                 }
+            }
+
+            if (showResetDialog) {
+                AlertDialog(
+                    onDismissRequest = { showResetDialog = false },
+                    title = {
+                        Text(
+                            text = "Reset Password",
+                            fontWeight = FontWeight.Bold
+                        )
+                    },
+                    text = {
+                        Text(
+                            text = "We will send a password reset link to your email address: $email",
+                            color = Color.Gray
+                        )
+                    },
+                    confirmButton = {
+                        TextButton(
+                            onClick = {
+                                authViewModel.resetPassword(email)
+                                showResetDialog = false
+                                Toast.makeText(
+                                    context,
+                                    "Password reset link sent to your email",
+                                    Toast.LENGTH_LONG
+                                ).show()
+                            }
+                        ) {
+                            Text(
+                                text = "Send Link",
+                                color = Color.Red,
+                                fontWeight = FontWeight.Bold
+                            )
+                        }
+                    },
+                    dismissButton = {
+                        TextButton(onClick = { showResetDialog = false }) {
+                            Text(
+                                text = "Cancel",
+                                color = Color.Gray
+                            )
+                        }
+                    }
+                )
             }
         }
     }
