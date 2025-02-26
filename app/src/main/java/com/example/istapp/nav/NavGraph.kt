@@ -68,5 +68,14 @@ fun NavGraph(authViewModel: AuthViewModel) {
             val userType = backStackEntry.arguments?.getString("userType") ?: "user"
             ViewUsersScreen(navController, authViewModel, userType)
         }
+
+        composable(Routes.editJob) { backStackEntry ->
+            val jobId = backStackEntry.arguments?.getString("jobId") ?: ""
+            EditJobScreen(
+                jobId = jobId,
+                navController = navController,
+                authViewModel = authViewModel
+            )
+        }
     }
 }

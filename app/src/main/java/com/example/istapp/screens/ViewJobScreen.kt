@@ -6,6 +6,7 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Delete
+import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.runtime.collectAsState
@@ -188,19 +189,36 @@ fun ViewJobScreen(jobId: String, navController: NavController, authViewModel: Au
                     }
 
                     item {
-                    // Apply Button
-                    Button(
-                            onClick = { /* Handle apply action */ },
-                        modifier = Modifier
-                            .fillMaxWidth()
-                                .height(50.dp)
-                                .padding(vertical = 8.dp),
-                            enabled = !isDeadlinePassed,
+                    // Edit Button
+                    if (userRole == "admin") {
+                        Button(
+                            onClick = { 
+                                navController.navigate("edit_job/${jobId}")
+                            },
+                            modifier = Modifier.fillMaxWidth(),
                             colors = ButtonDefaults.buttonColors(
-                                containerColor = Color.Red,
-                                contentColor = Color.White,
-                                disabledContainerColor = Color.Gray,
-                                disabledContentColor = Color.White
+                                containerColor = Color.Red
+                            )
+                        ) {
+                            Icon(
+                                imageVector = Icons.Default.Edit,
+                                contentDescription = "Edit Job",
+                                modifier = Modifier.size(20.dp)
+                            )
+                            Spacer(modifier = Modifier.width(8.dp))
+                            Text(
+                                text = "Edit Job",
+                                fontSize = 16.sp
+                            )
+                        }
+                    } else {
+                        // Existing Apply button for non-admin users
+                        Button(
+                            enabled = !isDeadlinePassed,
+                            onClick = { /* Apply functionality */ },
+                            modifier = Modifier.fillMaxWidth(),
+                            colors = ButtonDefaults.buttonColors(
+                                containerColor = if (!isDeadlinePassed) Color.Red else Color.Gray
                             )
                         ) {
                             Text(
@@ -208,6 +226,7 @@ fun ViewJobScreen(jobId: String, navController: NavController, authViewModel: Au
                                 fontSize = 16.sp
                             )
                         }
+                    }
                     }
                 }
             } ?: run {
