@@ -34,7 +34,6 @@ fun ProfileScreen(
 ) {
     var username by remember { mutableStateOf("") }
     var email by remember { mutableStateOf("") }
-    var role by remember { mutableStateOf("") }
     var showResetDialog by remember { mutableStateOf(false) }
     val context = LocalContext.current
     
@@ -53,7 +52,6 @@ fun ProfileScreen(
                 .get()
                 .addOnSuccessListener { document ->
                     username = document.getString("username") ?: ""
-                    role = document.getString("role") ?: "user"
                 }
         }
     }

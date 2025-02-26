@@ -82,7 +82,7 @@ fun TopBar(navController: NavController, modifier: Modifier = Modifier, scrollBe
         actions = {
             Icon(
                 imageVector = Icons.Rounded.Notifications,
-                contentDescription = "Menu Icon",
+                contentDescription = "Notification Icon",
                 modifier = Modifier
                     .padding(end = 8.dp)
                     .size(24.dp)
@@ -90,9 +90,12 @@ fun TopBar(navController: NavController, modifier: Modifier = Modifier, scrollBe
 
             Icon(
                 imageVector = Icons.Rounded.AccountCircle,
-                contentDescription = "Menu Icon",
+                contentDescription = "Profile Icon",
                 modifier = Modifier
-                    .clickable{navController.navigate(Routes.profile)}
+                    .clickable{navController.navigate(Routes.profile){
+                        popUpTo(Routes.profile) { inclusive = true } // Remove any previous instances of profile
+                        launchSingleTop = true // Prevents reloading the same screen
+                    } }
                     .padding(start = 8.dp, end = 16.dp)
                     .size(30.dp),
             )
