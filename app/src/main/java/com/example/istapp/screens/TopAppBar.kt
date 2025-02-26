@@ -95,6 +95,7 @@ fun TopBar(navController: NavController, modifier: Modifier = Modifier, scrollBe
                     .clickable{navController.navigate(Routes.profile){
                         popUpTo(Routes.profile) { inclusive = true } // Remove any previous instances of profile
                         launchSingleTop = true // Prevents reloading the same screen
+                        restoreState = true // Restores the state of the screen to prevent reload on route click while on the page
                     } }
                     .padding(start = 8.dp, end = 16.dp)
                     .size(30.dp),

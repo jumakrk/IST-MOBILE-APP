@@ -20,20 +20,20 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import com.example.istapp.AuthViewModel
-import com.google.firebase.auth.FirebaseAuth
-import com.google.firebase.firestore.FirebaseFirestore
+import com.example.istapp.viewmodels.ProfileViewModel
 import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ProfileScreen(
     navController: NavController,
-    authViewModel: AuthViewModel
+    authViewModel: AuthViewModel,
+    profileViewModel: ProfileViewModel = viewModel()
 ) {
-    var username by remember { mutableStateOf("") }
-    var email by remember { mutableStateOf("") }
+    val userProfile by profileViewModel.userProfile.collectAsState()
     var showResetDialog by remember { mutableStateOf(false) }
     val context = LocalContext.current
     
@@ -41,19 +41,9 @@ fun ProfileScreen(
     val drawerState = rememberDrawerState(initialValue = DrawerValue.Closed)
     val scope = rememberCoroutineScope()
 
-    // Fetch user details
+    // Fetch user details once
     LaunchedEffect(Unit) {
-        val currentUser = FirebaseAuth.getInstance().currentUser
-        if (currentUser != null) {
-            email = currentUser.email ?: ""
-            
-            val db = FirebaseFirestore.getInstance()
-            db.collection("users").document(currentUser.uid)
-                .get()
-                .addOnSuccessListener { document ->
-                    username = document.getString("username") ?: ""
-                }
-        }
+        profileViewModel.fetchUserProfile()
     }
 
     ModalNavigationDrawer(
@@ -114,7 +104,7 @@ fun ProfileScreen(
                             contentAlignment = Alignment.Center
                         ) {
                             Text(
-                                text = username.firstOrNull()?.uppercase() ?: "U",
+                                text = userProfile.username.firstOrNull()?.uppercase() ?: "U",
                                 color = Color.White,
                                 fontSize = 48.sp,
                                 fontWeight = FontWeight.Bold
@@ -124,7 +114,7 @@ fun ProfileScreen(
                         Spacer(modifier = Modifier.height(16.dp))
                         
                         Text(
-                            text = username,
+                            text = userProfile.username,
                             fontSize = 24.sp,
                             fontWeight = FontWeight.Bold
                         )
@@ -192,7 +182,7 @@ fun ProfileScreen(
                                     color = Color.Gray
                                 )
                                 Text(
-                                    text = username,
+                                    text = userProfile.username,
                                     fontSize = 16.sp,
                                     fontWeight = FontWeight.Medium
                                 )
@@ -221,7 +211,7 @@ fun ProfileScreen(
                                     color = Color.Gray
                                 )
                                 Text(
-                                    text = email,
+                                    text = userProfile.email,
                                     fontSize = 16.sp,
                                     fontWeight = FontWeight.Medium
                                 )
@@ -284,14 +274,14 @@ fun ProfileScreen(
                     },
                     text = {
                         Text(
-                            text = "We will send a password reset link to your email address: $email",
+                            text = "We will send a password reset link to your email address: ${userProfile.email}",
                             color = Color.Gray
                         )
                     },
                     confirmButton = {
                         TextButton(
                             onClick = {
-                                authViewModel.resetPassword(email)
+                                authViewModel.resetPassword(userProfile.email)
                                 showResetDialog = false
                                 Toast.makeText(
                                     context,
