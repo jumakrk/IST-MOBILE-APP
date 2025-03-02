@@ -14,7 +14,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import com.example.istapp.AuthViewModel
-import com.example.istapp.JobViewModel
+import com.example.istapp.viewmodels.JobViewModel
 import androidx.lifecycle.viewmodel.compose.viewModel
 import kotlinx.coroutines.launch
 import java.text.SimpleDateFormat

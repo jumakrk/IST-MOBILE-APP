@@ -88,8 +88,8 @@ fun ViewUsersScreen(
             }
         ) { paddingValues ->
             Column(
-                modifier = Modifier
-                    .fillMaxSize()
+                    modifier = Modifier
+                        .fillMaxSize()
                     .padding(paddingValues)
                     .padding(16.dp)
             ) {
@@ -131,7 +131,7 @@ fun ViewUsersScreen(
                         modifier = Modifier.weight(1f),
                         fontWeight = FontWeight.Bold
                     )
-                    Text(
+                        Text(
                         text = "Email",
                         style = MaterialTheme.typography.titleSmall,
                         modifier = Modifier.weight(2f), // Increased weight for email
@@ -166,7 +166,7 @@ fun ViewUsersScreen(
                             )
                             IconButton(
                                 onClick = {
-                                    selectedUser = user
+                                selectedUser = user
                                     showDialog = true
                                 },
                                 modifier = Modifier.weight(0.5f)
@@ -188,11 +188,11 @@ fun ViewUsersScreen(
                 AlertDialog(
                     onDismissRequest = { showDialog = false },
                     title = {
-                        Text(
+                                Text(
                             text = "Change User Role",
                             style = MaterialTheme.typography.titleLarge,
-                            fontWeight = FontWeight.Bold
-                        )
+                                    fontWeight = FontWeight.Bold
+                                )
                     },
                     text = {
                         Text(

@@ -7,6 +7,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Edit
+import androidx.compose.material.icons.rounded.LocationOn
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.runtime.collectAsState
@@ -22,8 +23,7 @@ import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.istapp.AuthViewModel
-import com.example.istapp.JobViewModel
-import com.example.istapp.nav.Routes
+import com.example.istapp.viewmodels.JobViewModel
 import kotlinx.coroutines.launch
 import java.text.SimpleDateFormat
 import java.util.*
@@ -36,15 +36,8 @@ fun ViewJobScreen(jobId: String, navController: NavController, authViewModel: Au
     val context = LocalContext.current
     val scope = rememberCoroutineScope()
     val drawerState = rememberDrawerState(initialValue = DrawerValue.Closed)
-    TopAppBarDefaults.enterAlwaysScrollBehavior(state = rememberTopAppBarState())
-    
-    // Observe user role
     val userRole = authViewModel.userRole.observeAsState().value ?: "user"
-
-    // State for delete confirmation dialog
     var showDeleteDialog by remember { mutableStateOf(false) }
-    // State for delete progress
-    var isDeleting by remember { mutableStateOf(false) }
 
     ModalNavigationDrawer(
         drawerState = drawerState,
@@ -61,41 +54,33 @@ fun ViewJobScreen(jobId: String, navController: NavController, authViewModel: Au
                         Text(
                             text = jobDetails?.title ?: "Loading...",
                             maxLines = 1,
-                            overflow = TextOverflow.Ellipsis
+                            overflow = TextOverflow.Ellipsis,
+                            color = Color.White,
+                            fontWeight = FontWeight.Bold
                         ) 
                     },
                     navigationIcon = {
                         IconButton(onClick = { navController.popBackStack() }) {
-                            Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back")
+                            Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back", tint = Color.White)
                         }
                     },
                     actions = {
                         if (userRole == "admin") {
-                            IconButton(
-                                onClick = { showDeleteDialog = true }
-                            ) {
-                                Icon(
-                                    Icons.Default.Delete,
-                                    contentDescription = "Delete Job",
-                                    tint = Color.White
-                                )
+                            IconButton(onClick = { showDeleteDialog = true }) {
+                                Icon(Icons.Default.Delete, contentDescription = "Delete Job", tint = Color.White)
                             }
                         }
                     },
                     colors = TopAppBarDefaults.topAppBarColors(
                         containerColor = Color.Red,
                         titleContentColor = Color.White,
-                        navigationIconContentColor = Color.White,
-                        actionIconContentColor = Color.White
+                        navigationIconContentColor = Color.White
                     )
                 )
             },
-            bottomBar = {
-                BottomBar(navController = navController)
-            }
+            bottomBar = { BottomBar(navController = navController) }
         ) { paddingValues ->
             jobDetails?.let { job ->
-                // Check if application deadline has passed
                 val isDeadlinePassed = remember(job.applicationDeadline) {
                     val dateFormat = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault())
                     try {
@@ -111,126 +96,150 @@ fun ViewJobScreen(jobId: String, navController: NavController, authViewModel: Au
                     modifier = Modifier
                         .fillMaxSize()
                         .padding(paddingValues)
-                        .padding(horizontal = 16.dp),
+                        .padding(16.dp),
                     verticalArrangement = Arrangement.spacedBy(16.dp)
                 ) {
+                    // Company Header
                     item {
-                        // Company
-                        Text(
-                            text = job.company,
-                            fontSize = 24.sp,
-                            fontWeight = FontWeight.Bold,
-                            modifier = Modifier.padding(top = 16.dp)
-                        )
-                    }
-
-                    item {
-                        // Location
-                        Text(
-                            text = "📍 ${job.location}",
-                            fontSize = 16.sp,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant
-                        )
-                    }
-
-                    item {
-                        // Job Type
-                        Text(
-                            text = "Type: ${job.type}",
-                            fontSize = 16.sp,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant
-                        )
-                    }
-
-                    item {
-                        // Description Header
-                        Text(
-                            text = "Description",
-                            fontSize = 18.sp,
-                            fontWeight = FontWeight.Bold
-                        )
-                        
-                        Spacer(modifier = Modifier.height(8.dp))
-                        
-                        // Description Content
-                        Text(
-                            text = job.description,
-                            fontSize = 16.sp
-                        )
-                    }
-
-                    item {
-                        // Additional Information
-                        Text(
-                            text = "Additional Information",
-                            fontSize = 18.sp,
-                            fontWeight = FontWeight.Bold
-                        )
-                        
-                    Spacer(modifier = Modifier.height(8.dp))
-                        
-                        Text(
-                            text = "Posted by: ${job.postedBy}",
-                            fontSize = 14.sp,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant
-                        )
-                        
-                        Text(
-                            text = "Posted on: ${job.datePosted}",
-                            fontSize = 14.sp,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant
-                        )
-                        
-                        Text(
-                            text = "Application Deadline: ${job.applicationDeadline}",
-                            fontSize = 14.sp,
-                            color = if (isDeadlinePassed) Color.Red else MaterialTheme.colorScheme.onSurfaceVariant
-                        )
-                    }
-
-                    item {
-                    // Edit Button
-                    if (userRole == "admin") {
-                        Button(
-                            onClick = { 
-                                navController.navigate("edit_job/${jobId}")
-                            },
+                        Card(
                             modifier = Modifier.fillMaxWidth(),
-                            colors = ButtonDefaults.buttonColors(
-                                containerColor = Color.Red
-                            )
+                            colors = CardDefaults.cardColors(
+                                containerColor = MaterialTheme.colorScheme.surface
+                            ),
+                            elevation = CardDefaults.cardElevation(4.dp)
                         ) {
-                            Icon(
-                                imageVector = Icons.Default.Edit,
-                                contentDescription = "Edit Job",
-                                modifier = Modifier.size(20.dp)
-                            )
-                            Spacer(modifier = Modifier.width(8.dp))
-                            Text(
-                                text = "Edit Job",
-                                fontSize = 16.sp
-                            )
-                        }
-                    } else {
-                        // Existing Apply button for non-admin users
-                        Button(
-                            enabled = !isDeadlinePassed,
-                            onClick = { /* Apply functionality */ },
-                            modifier = Modifier.fillMaxWidth(),
-                            colors = ButtonDefaults.buttonColors(
-                                containerColor = if (!isDeadlinePassed) Color.Red else Color.Gray
-                            )
-                        ) {
-                            Text(
-                                text = if (isDeadlinePassed) "Application Deadline Passed" else "Apply",
-                                fontSize = 16.sp
-                            )
+                            Column(
+                                modifier = Modifier.padding(16.dp)
+                            ) {
+                                Text(
+                                    text = job.company,
+                                    fontSize = 24.sp,
+                                    fontWeight = FontWeight.Bold,
+                                    color = Color.Red
+                                )
+                                Spacer(modifier = Modifier.height(8.dp))
+                                Row(
+                                    verticalAlignment = Alignment.CenterVertically
+                                ) {
+                                    Icon(
+                                        Icons.Rounded.LocationOn,
+                                        contentDescription = "Location",
+                                        tint = Color.Gray,
+                                        modifier = Modifier.size(20.dp)
+                                    )
+                                    Spacer(modifier = Modifier.width(4.dp))
+                                    Text(
+                                        text = job.location,
+                                        fontSize = 16.sp,
+                                        color = Color.Gray
+                                    )
+                                }
+                            }
                         }
                     }
+
+                    // Description Section
+                    item {
+                        Card(
+                            modifier = Modifier.fillMaxWidth(),
+                            colors = CardDefaults.cardColors(
+                                containerColor = MaterialTheme.colorScheme.surface
+                            ),
+                            elevation = CardDefaults.cardElevation(4.dp)
+                        ) {
+                            Column(
+                                modifier = Modifier.padding(16.dp)
+                            ) {
+                                Text(
+                                    text = "Job Description",
+                                    fontSize = 18.sp,
+                                    fontWeight = FontWeight.Bold,
+                                    color = Color.Red
+                                )
+                                Spacer(modifier = Modifier.height(8.dp))
+                                Text(
+                                    text = job.description,
+                                    fontSize = 16.sp,
+                                    lineHeight = 24.sp
+                                )
+                            }
+                        }
+                    }
+
+                    // Additional Information
+                    item {
+                        Card(
+                            modifier = Modifier.fillMaxWidth(),
+                            colors = CardDefaults.cardColors(
+                                containerColor = MaterialTheme.colorScheme.surface
+                            ),
+                            elevation = CardDefaults.cardElevation(4.dp)
+                        ) {
+                            Column(
+                                modifier = Modifier.padding(16.dp)
+                            ) {
+                                Text(
+                                    text = "Additional Information",
+                                    fontSize = 18.sp,
+                                    fontWeight = FontWeight.Bold,
+                                    color = Color.Red
+                                )
+                                Spacer(modifier = Modifier.height(12.dp))
+                                
+                                InfoRow(label = "Posted by", value = job.postedBy)
+                                Spacer(modifier = Modifier.height(8.dp))
+                                InfoRow(label = "Posted on", value = job.datePosted)
+                                Spacer(modifier = Modifier.height(8.dp))
+                                InfoRow(
+                                    label = "Application Deadline",
+                                    value = job.applicationDeadline,
+                                    valueColor = if (isDeadlinePassed) Color.Red else Color.Gray
+                                )
+                            }
+                        }
+                    }
+
+                    // Action Button
+                    item {
+                        if (userRole == "admin") {
+                            Button(
+                                onClick = { navController.navigate("edit_job/${jobId}") },
+                                modifier = Modifier.fillMaxWidth(),
+                                colors = ButtonDefaults.buttonColors(containerColor = Color.Red),
+                                contentPadding = PaddingValues(16.dp)
+                            ) {
+                                Icon(
+                                    imageVector = Icons.Default.Edit,
+                                    contentDescription = "Edit Job",
+                                    modifier = Modifier.size(20.dp)
+                                )
+                                Spacer(modifier = Modifier.width(8.dp))
+                                Text(
+                                    text = "Edit Job",
+                                    fontSize = 16.sp,
+                                    fontWeight = FontWeight.Bold
+                                )
+                            }
+                        } else {
+                            Button(
+                                enabled = !isDeadlinePassed,
+                                onClick = { /* Apply functionality */ },
+                                modifier = Modifier.fillMaxWidth(),
+                                colors = ButtonDefaults.buttonColors(
+                                    containerColor = if (!isDeadlinePassed) Color.Red else Color.Gray
+                                ),
+                                contentPadding = PaddingValues(16.dp)
+                            ) {
+                                Text(
+                                    text = if (isDeadlinePassed) "Application Deadline Passed" else "Apply Now",
+                                    fontSize = 16.sp,
+                                    fontWeight = FontWeight.Bold
+                                )
+                            }
+                        }
                     }
                 }
             } ?: run {
-                // Show loading indicator in the content area while keeping nav elements visible
                 Box(
                     modifier = Modifier
                         .fillMaxSize()
@@ -246,63 +255,55 @@ fun ViewJobScreen(jobId: String, navController: NavController, authViewModel: Au
     // Delete confirmation dialog
     if (showDeleteDialog) {
         AlertDialog(
-            onDismissRequest = { 
-                if (!isDeleting) showDeleteDialog = false 
-            },
-            title = { Text("Delete Job") },
-            text = { 
-                if (isDeleting) {
-                    Row(
-                        verticalAlignment = Alignment.CenterVertically,
-                        horizontalArrangement = Arrangement.spacedBy(8.dp)
-                    ) {
-                        CircularProgressIndicator(
-                            modifier = Modifier.size(24.dp),
-                            color = Color.Red
-                        )
-                        Text("Deleting job...")
-                    }
-                } else {
-                    Text("Are you sure you want to delete this job?")
-                }
-            },
+            onDismissRequest = { showDeleteDialog = false },
+            title = { Text("Delete Job", fontWeight = FontWeight.Bold) },
+            text = { Text("Are you sure you want to delete this job posting?") },
             confirmButton = {
                 TextButton(
                     onClick = {
-                        if (!isDeleting) {
-                            isDeleting = true
-                            scope.launch {
-                                try {
-                                    viewModel.deleteJob(jobId)
-                                    Toast.makeText(context, "Job deleted successfully", Toast.LENGTH_SHORT).show()
-                                    showDeleteDialog = false
-                                    navController.navigate(Routes.jobs) {
-                                        popUpTo(Routes.jobs) { inclusive = true }
-                                    }
-                                } catch (e: Exception) {
-                                    Toast.makeText(
-                                        context,
-                                        "Error deleting job: ${e.message}",
-                                        Toast.LENGTH_LONG
-                                    ).show()
-                                    isDeleting = false
-                                }
+                        scope.launch {
+                            try {
+                                viewModel.deleteJob(jobId)
+                                Toast.makeText(context, "Job deleted successfully", Toast.LENGTH_SHORT).show()
+                                navController.navigateUp()
+                            } catch (e: Exception) {
+                                Toast.makeText(context, e.message, Toast.LENGTH_LONG).show()
                             }
                         }
-                    },
-                    enabled = !isDeleting
+                    }
                 ) {
-                    Text("Delete", color = if (!isDeleting) Color.Red else Color.Gray)
+                    Text("Delete", color = Color.Red, fontWeight = FontWeight.Bold)
                 }
             },
             dismissButton = {
-                TextButton(
-                    onClick = { showDeleteDialog = false },
-                    enabled = !isDeleting
-                ) {
-                    Text("Cancel")
+                TextButton(onClick = { showDeleteDialog = false }) {
+                    Text("Cancel", color = Color.Gray)
                 }
             }
+        )
+    }
+}
+
+@Composable
+private fun InfoRow(
+    label: String,
+    value: String,
+    valueColor: Color = Color.Gray
+) {
+    Row(
+        modifier = Modifier.fillMaxWidth(),
+        horizontalArrangement = Arrangement.SpaceBetween
+    ) {
+        Text(
+            text = label,
+            fontSize = 14.sp,
+            color = Color.Gray
+        )
+        Text(
+            text = value,
+            fontSize = 14.sp,
+            color = valueColor,
+            fontWeight = FontWeight.Medium
         )
     }
 }
