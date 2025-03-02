@@ -21,6 +21,10 @@ class ProfileViewModel : ViewModel() {
 
     private var hasLoadedProfile = false
 
+    init {
+        fetchUserProfile() // Fetch profile when ViewModel is created
+    }
+
     fun fetchUserProfile() {
         if (!hasLoadedProfile) {
             val currentUser = FirebaseAuth.getInstance().currentUser
@@ -30,17 +34,21 @@ class ProfileViewModel : ViewModel() {
                         email = currentUser.email ?: ""
                     )
                     
-                    FirebaseFirestore.getInstance()
-                        .collection("users")
-                        .document(currentUser.uid)
-                        .get()
-                        .addOnSuccessListener { document ->
-                            val username = document.getString("username") ?: ""
-                            _userProfile.value = _userProfile.value.copy(
-                                username = username
-                            )
-                            hasLoadedProfile = true
-                        }
+                    try {
+                        val document = FirebaseFirestore.getInstance()
+                            .collection("users")
+                            .document(currentUser.uid)
+                            .get()
+                            .await()
+                            
+                        val username = document.getString("username") ?: ""
+                        _userProfile.value = _userProfile.value.copy(
+                            username = username
+                        )
+                        hasLoadedProfile = true
+                    } catch (e: Exception) {
+                        // Handle error
+                    }
                 }
             }
         }
