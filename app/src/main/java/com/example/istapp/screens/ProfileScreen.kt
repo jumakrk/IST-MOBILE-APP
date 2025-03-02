@@ -9,7 +9,6 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Email
 import androidx.compose.material.icons.filled.Lock
-import androidx.compose.material.icons.filled.Menu
 import androidx.compose.material.icons.filled.Person
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
@@ -45,7 +44,7 @@ fun ProfileScreen(
     var newUsername by remember { mutableStateOf("") }
     val context = LocalContext.current
 
-    TopAppBarDefaults.enterAlwaysScrollBehavior(rememberTopAppBarState())
+    val scrollBehavior = TopAppBarDefaults.enterAlwaysScrollBehavior(rememberTopAppBarState())
     val drawerState = rememberDrawerState(initialValue = DrawerValue.Closed)
     val scope = rememberCoroutineScope()
 
@@ -68,22 +67,10 @@ fun ProfileScreen(
     ) {
         Scaffold(
             topBar = {
-                TopAppBar(
-                    title = { Text("Profile", color = Color.White) },
-                    navigationIcon = {
-                        IconButton(onClick = { scope.launch { drawerState.open() } }) {
-                            Icon(
-                                imageVector = Icons.Default.Menu,
-                                contentDescription = "Menu",
-                                tint = Color.White
-                            )
-                        }
-                    },
-                    colors = TopAppBarDefaults.topAppBarColors(
-                        containerColor = Color.Red,
-                        titleContentColor = Color.White,
-                        navigationIconContentColor = Color.White
-                    )
+                TopBar(
+                    navController = navController,
+                    scrollBehavior = scrollBehavior,
+                    onOpenDrawer = { scope.launch { drawerState.open() } }
                 )
             },
             bottomBar = {
@@ -97,11 +84,12 @@ fun ProfileScreen(
                 modifier = Modifier
                     .fillMaxSize()
                     .padding(paddingValues)
-                    .padding(16.dp),
-                verticalArrangement = Arrangement.spacedBy(16.dp)
+                    .padding(horizontal = 16.dp),
+                verticalArrangement = Arrangement.spacedBy(24.dp)
             ) {
-                // Profile Picture Section
+                // Profile Picture Section with more spacing
                 item {
+                    Spacer(modifier = Modifier.height(24.dp))
                     Box(
                         modifier = Modifier.fillMaxWidth(),
                         contentAlignment = Alignment.Center
@@ -121,6 +109,11 @@ fun ProfileScreen(
                             )
                         }
                     }
+                }
+
+                // Spacer to push the card down
+                item {
+                    Spacer(modifier = Modifier.height(32.dp))
                 }
 
                 // User Information Card
@@ -173,6 +166,11 @@ fun ProfileScreen(
                             )
                         }
                     }
+                }
+
+                // Bottom spacing
+                item {
+                    Spacer(modifier = Modifier.height(24.dp))
                 }
             }
         }
