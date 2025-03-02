@@ -29,6 +29,8 @@ import kotlinx.coroutines.launch
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.ui.text.input.ImeAction
+import com.example.istapp.nav.Routes
+import kotlinx.coroutines.delay
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -187,7 +189,23 @@ fun ProfileScreen(
                     onClick = {
                         authViewModel.resetPassword(userProfile.email)
                         showResetDialog = false
-                        Toast.makeText(context, "Password reset link sent to your email", Toast.LENGTH_LONG).show()
+                        // Show success message first
+                        Toast.makeText(
+                            context, 
+                            "Password reset link sent. Please check your email and login with your new password.", 
+                            Toast.LENGTH_LONG
+                        ).show()
+                        
+                        // Delay logout and navigation by 3 seconds
+                        scope.launch {
+                            delay(3000) // 3 seconds delay
+                            // Log out the user
+                            authViewModel.logout(context)
+                            // Navigate to login screen
+                            navController.navigate(Routes.login) {
+                                popUpTo(Routes.homepage) { inclusive = true }
+                            }
+                        }
                     }
                 ) {
                     Text("Send Link", color = Color.Red)
