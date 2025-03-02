@@ -1,16 +1,18 @@
 package com.example.istapp.viewmodels
 
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
 import com.example.istapp.screens.Job
 import com.google.firebase.firestore.FirebaseFirestore
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.flow
-import kotlinx.coroutines.flow.flowOn
+import kotlinx.coroutines.flow.*
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.tasks.await
 
 class JobViewModel : ViewModel() {
     private val firestore = FirebaseFirestore.getInstance()
+    private val _refreshTrigger = MutableSharedFlow<Unit>()
+    val refreshTrigger = _refreshTrigger.asSharedFlow()
 
     // Fetch job details
     fun getJobDetails(jobId: String): Flow<Job?> = flow {
@@ -18,16 +20,17 @@ class JobViewModel : ViewModel() {
         emit(document.toObject(Job::class.java)?.copy(id = document.id))
     }.flowOn(Dispatchers.IO)
 
-    // Delete job
+    // Delete job with refresh trigger
     suspend fun deleteJob(jobId: String) {
         try {
             firestore.collection("jobs").document(jobId).delete().await()
+            _refreshTrigger.emit(Unit) // Trigger refresh after successful deletion
         } catch (e: Exception) {
             throw Exception("Failed to delete job: ${e.message}")
         }
     }
 
-    // Update job
+    // Update job with refresh trigger
     suspend fun updateJob(
         jobId: String,
         title: String,
@@ -49,6 +52,7 @@ class JobViewModel : ViewModel() {
                 .document(jobId)
                 .update(updates as Map<String, Any>)
                 .await()
+            _refreshTrigger.emit(Unit) // Trigger refresh after successful update
         } catch (e: Exception) {
             throw Exception("Failed to update job: ${e.message}")
         }

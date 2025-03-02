@@ -21,6 +21,7 @@ import androidx.compose.material.icons.rounded.Add
 import androidx.compose.material.icons.rounded.LocationOn
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
@@ -40,6 +41,7 @@ import com.example.istapp.nav.Routes
 import com.google.firebase.firestore.FirebaseFirestore
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.tasks.await
+import com.example.istapp.viewmodels.JobViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
 @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
@@ -48,9 +50,15 @@ fun JobsScreen(navController: NavHostController, authViewModel: AuthViewModel) {
     val scrollBehavior = TopAppBarDefaults.enterAlwaysScrollBehavior(state = rememberTopAppBarState())
     val drawerState = rememberDrawerState(initialValue = DrawerValue.Closed)
     val scope = rememberCoroutineScope()
+    val jobsViewModel: JobsViewModel = viewModel()
 
     // Observe the user's role from the ViewModel
     val userRole = authViewModel.userRole.observeAsState().value ?: "user"
+
+    // Add LaunchedEffect to refresh jobs when screen becomes active
+    LaunchedEffect(Unit) {
+        jobsViewModel.refreshJobs()
+    }
 
     ModalNavigationDrawer(
         drawerState = drawerState,
@@ -128,9 +136,21 @@ object FirestoreService {
 class JobsViewModel : ViewModel() {
     private val _jobs = MutableLiveData<List<Job>>()
     val jobs: LiveData<List<Job>> get() = _jobs
+    private val jobViewModel = JobViewModel()
 
     init {
         // Fetch jobs when the ViewModel is initialized
+        fetchJobs()
+        
+        // Listen for refresh triggers
+        viewModelScope.launch {
+            jobViewModel.refreshTrigger.collect {
+                fetchJobs()
+            }
+        }
+    }
+
+    fun refreshJobs() {
         fetchJobs()
     }
 
