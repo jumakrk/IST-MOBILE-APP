@@ -8,6 +8,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.tasks.await
 
 data class UserProfile(
     val username: String = "",
@@ -42,6 +43,26 @@ class ProfileViewModel : ViewModel() {
                         }
                 }
             }
+        }
+    }
+
+    suspend fun updateUsername(newUsername: String): Result<Unit> {
+        return try {
+            val currentUser = FirebaseAuth.getInstance().currentUser
+            if (currentUser != null) {
+                FirebaseFirestore.getInstance()
+                    .collection("users")
+                    .document(currentUser.uid)
+                    .update("username", newUsername)
+                    .await()
+
+                _userProfile.value = _userProfile.value.copy(username = newUsername)
+                Result.success(Unit)
+            } else {
+                Result.failure(Exception("User not authenticated"))
+            }
+        } catch (e: Exception) {
+            Result.failure(e)
         }
     }
 } 

@@ -152,6 +152,7 @@ fun SplashView(
     }
 }
 
+// Function to check internet connection
 fun checkInternetConnection(context: Context): Boolean {
     val connectivityManager =
         context.getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
