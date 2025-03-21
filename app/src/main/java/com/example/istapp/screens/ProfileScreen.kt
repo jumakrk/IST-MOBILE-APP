@@ -23,7 +23,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
-import com.example.istapp.AuthViewModel
+import com.example.istapp.viewmodels.AuthViewModel
 import com.example.istapp.viewmodels.ProfileViewModel
 import kotlinx.coroutines.launch
 import androidx.compose.foundation.text.KeyboardActions

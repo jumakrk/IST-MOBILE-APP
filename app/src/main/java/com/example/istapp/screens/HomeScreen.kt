@@ -28,7 +28,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavHostController
-import com.example.istapp.AuthViewModel
+import com.example.istapp.viewmodels.AuthViewModel
 import com.example.istapp.nav.Routes
 import com.google.firebase.auth.FirebaseAuth
 import kotlinx.coroutines.launch

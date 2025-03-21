@@ -20,8 +20,8 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
-import com.example.istapp.AuthState
-import com.example.istapp.AuthViewModel
+import com.example.istapp.viewmodels.AuthState
+import com.example.istapp.viewmodels.AuthViewModel
 import com.example.istapp.R
 import com.example.istapp.nav.Routes
 import kotlinx.coroutines.delay

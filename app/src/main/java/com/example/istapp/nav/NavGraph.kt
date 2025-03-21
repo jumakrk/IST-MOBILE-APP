@@ -4,7 +4,7 @@ import androidx.compose.runtime.Composable
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
-import com.example.istapp.AuthViewModel
+import com.example.istapp.viewmodels.AuthViewModel
 import com.example.istapp.screens.*
 
 @Composable

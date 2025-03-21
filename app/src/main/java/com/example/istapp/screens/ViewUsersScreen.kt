@@ -17,7 +17,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
-import com.example.istapp.AuthViewModel
+import com.example.istapp.viewmodels.AuthViewModel
 import com.example.istapp.models.User
 import com.google.firebase.firestore.FirebaseFirestore
 import kotlinx.coroutines.launch

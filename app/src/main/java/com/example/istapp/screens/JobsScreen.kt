@@ -36,7 +36,7 @@ import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
-import com.example.istapp.AuthViewModel
+import com.example.istapp.viewmodels.AuthViewModel
 import com.example.istapp.nav.Routes
 import com.google.firebase.firestore.FirebaseFirestore
 import kotlinx.coroutines.launch
