@@ -79,14 +79,14 @@ fun DrawerContent(
                     painter = painterResource(R.drawable.ist_logo),
                     contentDescription = "IST Logo",
                     modifier = Modifier.size(100.dp)
-                )
-                
-                Spacer(modifier = Modifier.height(16.dp))
-                
-                Text(
+        )
+
+        Spacer(modifier = Modifier.height(16.dp))
+
+        Text(
                     text = username ?: "User",
                     fontSize = 20.sp,
-                    fontWeight = FontWeight.Bold,
+            fontWeight = FontWeight.Bold,
                     color = Color.Black
                 )
                 
@@ -95,7 +95,7 @@ fun DrawerContent(
                     fontSize = 14.sp,
                     color = Color.Gray,
                     modifier = Modifier.padding(top = 4.dp)
-                )
+        )
             }
         }
 
@@ -109,20 +109,20 @@ fun DrawerContent(
                 .fillMaxWidth()
                 .padding(horizontal = 8.dp)
         ) {
-            if (userRole == "admin") {
-                NavigationDrawerItem(
-                    icon = {
-                        Icon(
-                            imageVector = Icons.Rounded.AdminPanelSettings,
-                            contentDescription = "Admins",
+        if (userRole == "admin") {
+        NavigationDrawerItem(
+            icon = {
+                Icon(
+                    imageVector = Icons.Rounded.AdminPanelSettings,
+                    contentDescription = "Admins",
                             modifier = Modifier.size(24.dp),
                             tint = Color.Red
-                        )
-                    },
+                )
+            },
                     label = { Text(text = "Manage Admins", fontSize = 16.sp) },
-                    selected = false,
-                    onClick = {
-                        navController.navigate("viewUsers/admin")
+            selected = false,
+            onClick = {
+                navController.navigate("viewUsers/admin")
                         onCloseDrawer()
                     },
                     colors = NavigationDrawerItemDefaults.colors(
@@ -130,23 +130,23 @@ fun DrawerContent(
                         selectedContainerColor = Color.Red.copy(alpha = 0.1f)
                     ),
                     shape = RoundedCornerShape(12.dp)
-                )
+        )
 
                 Spacer(modifier = Modifier.height(8.dp))
 
-                NavigationDrawerItem(
-                    icon = {
-                        Icon(
-                            imageVector = Icons.Rounded.People,
-                            contentDescription = "Users",
+        NavigationDrawerItem(
+            icon = {
+                Icon(
+                    imageVector = Icons.Rounded.People,
+                    contentDescription = "Users",
                             modifier = Modifier.size(24.dp),
                             tint = Color.Red
-                        )
-                    },
+                )
+            },
                     label = { Text(text = "Manage Users", fontSize = 16.sp) },
-                    selected = false,
-                    onClick = {
-                        navController.navigate("viewUsers/user")
+            selected = false,
+            onClick = {
+                navController.navigate("viewUsers/user")
                         onCloseDrawer()
                     },
                     colors = NavigationDrawerItemDefaults.colors(
