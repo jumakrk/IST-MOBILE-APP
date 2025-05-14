@@ -2,6 +2,8 @@ package com.example.istapp.screens
 
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.BusinessCenter
 import androidx.compose.material.icons.filled.Home
@@ -23,6 +25,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import com.example.istapp.nav.Routes
 
@@ -86,14 +89,16 @@ fun BottomBar(
                                 else
                                     bottomNavItem.unselectedIcon,
                                 contentDescription = bottomNavItem.label,
-                                tint = if (index == selected) Color.White else Color.LightGray // Change icon color based on selection
+                                tint = if (index == selected) Color.White else Color.LightGray, // Change icon color based on selection
+                                modifier = Modifier.size(24.dp) // Set a fixed size for the icon
                             )
                         }
                     },
                     label = {
                         Text(
                             text = bottomNavItem.label,
-                            color = if (index == selected) Color.White else Color.LightGray // Change text color based on selection
+                            color = if (index == selected) Color.White else Color.LightGray, // Change text color based on selection
+                            fontSize = 12.sp // Reduce text size
                         )
                     },
                     colors = NavigationBarItemDefaults.colors(
@@ -101,6 +106,7 @@ fun BottomBar(
                         unselectedIconColor = Color.LightGray,    // Icon color when unselected
                         indicatorColor = Color.Transparent // Set indicator color to transparent
                     ),
+                    modifier = Modifier.padding(horizontal = 50.dp) // Add horizontal padding to reduce hit box
                 )
             }
         }
